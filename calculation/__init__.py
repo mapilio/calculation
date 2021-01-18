@@ -20,9 +20,10 @@ pixCalc
 Contains all above functions. Needs improvment on destination point and angle calculation. Rest works fine
 """
 
-from calculation.area import Area  # noqa
-from calculation.distance import Distance  # noqa
-from calculation.intersection import Intersection  # noqa
-from calculation.iterator import Iterator  # noqa
-from calculation.pixel import Pixel  # noqa
-from calculation.util import __version__, __version_info__, get_version  # noqa
+from calculation.area import Area
+from calculation.distance import Distance
+from calculation.intersection import Intersection
+from calculation.iterator import Iterator
+from calculation.pixel import Pixel
+
+from calculation.util import __version__, __version_info__, get_version
