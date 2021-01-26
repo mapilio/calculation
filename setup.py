@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 if sys.version_info < (3, 5):
     raise RuntimeError(
-        "Mapilio Calculation supports Python 3.5 and above. "
+        "Mapilio Calculation supports Python 3.6 and above. "
     )
 
 # This import must be below the above `sys.version_info` check,
@@ -33,7 +33,13 @@ setup(
     author='Mapilio - Ozcan Durak',
     author_email='ozcan@visiosoft.com.tr',
     license='licensed',
-    packages=find_packages(exclude=('tests', 'docs', 'examples')),
+    package_dir={'': 'calculation'},
+    packages=find_packages(where='calculation', exclude=('tests', 'docs', 'examples')),
     install_requires=INSTALL_REQUIRES,
-    python_requires=">=3.5",
+    python_requires=">=3.5, <4",
+    project_urls={  # Optional
+            'Bug Reports': 'https://github.com/mapilio/calculation/issues',
+            'Say Thanks!': 'https://mapilio.com/#contact',
+            'Source': 'https://github.com/mapilio/calculation/',
+        },
 )
