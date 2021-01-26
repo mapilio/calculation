@@ -6,7 +6,7 @@ from decimal import *
 
 class Pixel:
 
-    @property
+    # @property
     def decimalFix(self, number):
         getcontext().rounding = ROUND_DOWN
         return Decimal(number).quantize(Decimal(10) ** -9)
