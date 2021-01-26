@@ -36,7 +36,7 @@ setup(
     package_dir={'': 'calculation'},
     packages=find_packages(where='calculation', exclude=('tests', 'docs', 'examples')),
     install_requires=INSTALL_REQUIRES,
-    python_requires=">=3.5, <4",
+    python_requires=">=3.6, <4",
     project_urls={  # Optional
             'Bug Reports': 'https://github.com/mapilio/calculation/issues',
             'Say Thanks!': 'https://mapilio.com/#contact',
