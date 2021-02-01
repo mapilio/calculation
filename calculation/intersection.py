@@ -2,8 +2,9 @@ import calculation.distance as distance
 
 class Intersection:
 
-    def __init__(self, intersection_lineLength):
+    def __init__(self, intersection_lineLength, angle_wide):
         self.intersection_lineLength = intersection_lineLength
+        self.intersection.angle_wide = angle_wide
 
     @staticmethod
     def ruleSet(c):
@@ -26,10 +27,11 @@ class Intersection:
             return a <= n and n <= b
         return a <= n or n <= b
 
-    @staticmethod
-    def calcBetw(n, a):
+    @classmethod
+    def calcBetw(self, n):
         # n = heading
         # a = angle
+        a = self.intersection.angle_wide
         t = 360 + n
         x = (-(a - t)) % 360
         y = (a + t) % 360
