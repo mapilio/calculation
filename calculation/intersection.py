@@ -1,9 +1,53 @@
+import calculation.distance as distance
+
 class Intersection:
 
-    def ruleSet(self, c):
+    def __init__(self, intersection_lineLength, angle_wide):
+        self.intersection_lineLength = intersection_lineLength
+        self.intersection.angle_wide = angle_wide
+
+    @staticmethod
+    def ruleSet(c):
         confidence_rate = (1 - 1 / c) if c else "{} can't null".format({c})
 
         return confidence_rate
+
+    @staticmethod
+    def angle_between(n, a, b):
+        ## n = chech between a and b parameter
+        ## a start point angle
+        ## b finish point angle
+        n = int(n)
+        a = int(a)
+        b = int(b)
+        n = (360 + (n % 360)) % 360
+        a = (3600000 + a) % 360
+        b = (3600000 + b) % 360
+        if a < b:
+            return a <= n and n <= b
+        return a <= n or n <= b
+
+    @classmethod
+    def calcBetw(self, n):
+        # n = heading
+        # a = angle
+        a = self.intersection.angle_wide
+        t = 360 + n
+        x = (-(a - t)) % 360
+        y = (a + t) % 360
+        # x, y hands of angle
+        return x, y
+
+    @classmethod
+    def opsDetect(self, location):
+        # location noktaların bulunduğu konum
+        # config ise burada line uzunluğunu belirtmek için, config dosyasından değiştirdiğimizde otomatik değişmesini sağlıyor.
+        ops = []
+        for i in range(0, len(location), 3):
+            ops.append(distance.destinationPoint(location[i], location[i + 1], self.intersection_lineLength,
+                                                 location[i + 2]))
+
+        return ops[0], ops[1]
 
     @classmethod
     def checkLineIntersection(self, line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX,
@@ -124,12 +168,12 @@ class Intersection:
         # return the intersection over union value
 
     @classmethod
-    def IntersectionPointsFind(self, m, start_lat1, start_lon1, theta1, start_lat2, start_lon2, theta2, cfg):
-        ops1, ops2 = m.opsDetect([start_lat1, start_lon1, theta1,
+    def IntersectionPointsFind(self,  start_lat1, start_lon1, theta1, start_lat2, start_lon2, theta2):
+        ops1, ops2 = self.opsDetect([start_lat1, start_lon1, theta1,
                                   start_lat2, start_lon2, theta2],
-                                 cfg)
+                                 )
 
-        intSection1Lat, intSection1Lon, intSection2Lat, intSection2Lon = m.interSections(ops1["lat"],
+        intSection1Lat, intSection1Lon, intSection2Lat, intSection2Lon = distance.interSections(ops1["lat"],
                                                                                          ops1["lon"],
                                                                                          ops2["lat"],
                                                                                          ops2["lon"])

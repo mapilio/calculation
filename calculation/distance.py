@@ -3,27 +3,30 @@ from calculation.units import TO_RAD, TO_DEG, RADIUS
 from trianglesolver import solve, degree
 import numpy
 
-def checkValidity(a, b, c):
-    """
-    Triangle rule checks
-    it's triangle edged as a, b, c
-    Parameters
-    ----------
-    a
-    b
-    c
 
-    Returns if is not triangle and C degree over the defined variable return False.
-    -------
-
-    """
-    a, b, c, A, B, C = solve(a, b, c)
-    if (a + b <= c) or (a + c <= b) or (b + c <= a):
-        if not 5 < (C / degree) < 20:
-            return False
-    return True
 
 class Distance:
+
+    @staticmethod
+    def checkValidity(a, b, c):
+        """
+        Triangle rule checks
+        it's triangle edged as a, b, c
+        Parameters
+        ----------
+        a
+        b
+        c
+
+        Returns if is not triangle and C degree over the defined variable return False.
+        -------
+
+        """
+        a, b, c, A, B, C = solve(a, b, c)
+        if (a + b <= c) or (a + c <= b) or (b + c <= a):
+            if not 5 < (C / degree) < 20:
+                return False
+        return True
 
     @classmethod
     def bearing(self, startLat, startLon, destLat, destLon):
