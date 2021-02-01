@@ -11,8 +11,8 @@ class Pixel:
         getcontext().rounding = ROUND_DOWN
         return Decimal(number).quantize(Decimal(10) ** -9)
 
-    @classmethod
-    def calcOrigin(self, y0, x0, box, height=0, width=0, horizon=0, lefBegin=0, rightBegin=0):
+    @staticmethod
+    def calcOrigin(y0, x0, box, height=0, width=0, horizon=0, lefBegin=0, rightBegin=0):
         if len(box) == 4:
             ymin = horizon + y0 + int(round(box[1] * height))
             xmin = x0 + int(round(box[0] * width + lefBegin))
@@ -38,13 +38,13 @@ class Pixel:
 
             return contours
 
-    @classmethod
-    def tileImageCalc(self, cropImage, numrows, numcols):
+    @staticmethod
+    def tileImageCalc(cropImage, numrows, numcols):
         tileHeight = int(cropImage.shape[0] / numrows)
         tileWidth = int(cropImage.shape[1] / numcols)
         return tileHeight, tileWidth
 
-    @classmethod
+    @staticmethod
     def AverageBboxCoord(bbox_coords1, bbox_coords2):
         result = []
         [result.append((a + b) / 2) for a, b in zip(bbox_coords1, bbox_coords2)]
