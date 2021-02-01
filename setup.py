@@ -27,14 +27,14 @@ INSTALL_REQUIRES = [
 ]
 
 setup(
-    name='calculation',
+    name='calculation-mapilio',
+    version=version,
     description='Mapilio Calculation Library',
     url='https://github.com/mapilio/calculation.git',
     author='Mapilio - Ozcan Durak',
     author_email='ozcan@visiosoft.com.tr',
     license='licensed',
-    package_dir={'': 'calculation'},
-    packages=find_packages(where='calculation', exclude=('tests', 'docs', 'examples')),
+    packages=find_packages(),
     install_requires=INSTALL_REQUIRES,
     python_requires=">=3.6, <4",
     project_urls={  # Optional
