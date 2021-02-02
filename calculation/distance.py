@@ -28,19 +28,17 @@ class Distance:
                 return False
         return True
 
-    @staticmethod
-    def bearing(startLat, startLon, destLat, destLon):
+    def bearing(self, startLat, startLon, destLat, destLon):
         phi1 = radians(startLat)
         phi2 = radians(destLat)
         cosPhi2 = cos(phi2)
         dLmd = radians(destLon - startLon)
         aci = atan2(sin(dLmd) * cosPhi2,
-                         cos(phi1) * sin(phi2) - sin(phi1) * cosPhi2 * cos(dLmd))
+                    cos(phi1) * sin(phi2) - sin(phi1) * cosPhi2 * cos(dLmd))
         print(aci * TO_DEG)
         return aci * TO_DEG
 
-    @staticmethod
-    def haversine(lon1, lat1, lon2, lat2):
+    def haversine(self, lon1, lat1, lon2, lat2):
         """
         Calculate the great circle distance between two points
         on the earth (specified in decimal degrees)
@@ -85,16 +83,15 @@ class Distance:
         """
 
         edgeAB = (self.haversine(cornerA[0], cornerA[1],
-                                  cornerB[0], cornerB[1])) * 1000
+                                 cornerB[0], cornerB[1])) * 1000
         edgeAC = (self.haversine(cornerA[0], cornerA[1],
-                                  cornerC[0], cornerC[1])) * 1000
+                                 cornerC[0], cornerC[1])) * 1000
         edgeBC = (self.haversine(cornerB[0], cornerB[1],
-                                  cornerC[0], cornerC[1])) * 1000
+                                 cornerC[0], cornerC[1])) * 1000
 
         return self.checkValidity(edgeAB, edgeAC, edgeBC)
 
-    @staticmethod
-    def checkBBoxDistance(box, cfg):
+    def checkBBoxDistance(self, box, cfg):
         xmin, ymin, xmax, ymax = list(map(int, box))
         # print("Y Distances = ",np.abs(ymax-ymin),
         #       "X Distances = ", np.abs(xmax-xmin))
@@ -104,8 +101,7 @@ class Distance:
             return False
         return True
 
-    @staticmethod
-    def LineToXYs(line):  # return first and last coordinates
+    def LineToXYs(self, line):  # return first and last coordinates
         firstX, firstY = (line.firstPoint.X, line.firstPoint.Y)
         lastX, lastY = (line.lastPoint.X, line.lastPoint.Y)
         return [(firstX, firstY), (lastX, lastY)]
@@ -147,4 +143,4 @@ class Distance:
         initial_bearing = math.degrees(initial_bearing)
         compass_bearing = (initial_bearing + 360) % 360
 
-
+        return compass_bearing
