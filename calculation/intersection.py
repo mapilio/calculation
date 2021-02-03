@@ -1,10 +1,11 @@
-import calculation.distance as distance
+from calculation.distance import Distance
+
 
 class Intersection:
 
     def __init__(self, intersection_lineLength, angle_wide):
         self.intersection_lineLength = intersection_lineLength
-        self.intersection.angle_wide = angle_wide
+        self.intersection_angle_wide = angle_wide
 
     @staticmethod
     def ruleSet(c):
@@ -27,29 +28,26 @@ class Intersection:
             return a <= n and n <= b
         return a <= n or n <= b
 
-    @classmethod
     def calcBetw(self, n):
         # n = heading
         # a = angle
-        a = self.intersection.angle_wide
+        a = self.intersection_angle_wide
         t = 360 + n
         x = (-(a - t)) % 360
         y = (a + t) % 360
         # x, y hands of angle
         return x, y
 
-    @classmethod
     def opsDetect(self, location):
         # location noktaların bulunduğu konum
         # config ise burada line uzunluğunu belirtmek için, config dosyasından değiştirdiğimizde otomatik değişmesini sağlıyor.
         ops = []
         for i in range(0, len(location), 3):
-            ops.append(distance.destinationPoint(location[i], location[i + 1], self.intersection_lineLength,
+            ops.append(Distance.destinationPoint(location[i], location[i + 1], self.intersection_lineLength,
                                                  location[i + 2]))
 
         return ops[0], ops[1]
 
-    @classmethod
     def checkLineIntersection(self, line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX,
                               line2EndY):
         result = {
@@ -167,16 +165,14 @@ class Intersection:
             return False
         # return the intersection over union value
 
-    @classmethod
-    def IntersectionPointsFind(self,  start_lat1, start_lon1, theta1, start_lat2, start_lon2, theta2):
+    def IntersectionPointsFind(self, start_lat1, start_lon1, theta1, start_lat2, start_lon2, theta2):
         ops1, ops2 = self.opsDetect([start_lat1, start_lon1, theta1,
-                                  start_lat2, start_lon2, theta2],
-                                 )
+                                     start_lat2, start_lon2, theta2],
+                                    )
 
-        intSection1Lat, intSection1Lon, intSection2Lat, intSection2Lon = distance.interSections(ops1["lat"],
-                                                                                         ops1["lon"],
-                                                                                         ops2["lat"],
-                                                                                         ops2["lon"])
+        # intSection1Lat, intSection1Lon, intSection2Lat, intSection2Lon = interSections(ops1["lat"],    ops1["lon"],
+        #                                                                                  ops2["lat"],
+        #                                                                                  ops2["lon"])
 
         destinationPoint1 = [(start_lat1, start_lon1),
                              (ops1["lat"], ops1["lon"])]
@@ -185,11 +181,11 @@ class Intersection:
                              (ops2["lat"], ops2["lon"])]
 
         interSection = self.checkLineIntersection(start_lat1,
-                                                   start_lon1,
-                                                   intSection1Lat, intSection1Lon,
+                                                  start_lon1,
+                                                  ops1["lat"], ops1["lon"],
 
-                                                   start_lat2,
-                                                   start_lon2,
-                                                   intSection2Lat, intSection2Lon)
+                                                  start_lat2,
+                                                  start_lon2,
+                                                  ops2["lat"], ops2["lon"])
 
         return interSection, destinationPoint1, destinationPoint2
