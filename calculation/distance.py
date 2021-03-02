@@ -91,7 +91,8 @@ class Distance:
 
         return self.checkValidity(edgeAB, edgeAC, edgeBC)
 
-    def checkBBoxDistance(self, box, cfg):
+    @staticmethod
+    def checkBBoxDistance(box, cfg):
         xmin, ymin, xmax, ymax = list(map(int, box))
         # print("Y Distances = ",np.abs(ymax-ymin),
         #       "X Distances = ", np.abs(xmax-xmin))
