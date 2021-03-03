@@ -16,7 +16,7 @@ if sys.version_info < (3, 5):
 # This import must be below the above `sys.version_info` check,
 # because the code being imported here is not compatible with the older
 # versions of Python.
-from calculation import __version__ as version # noqa
+from calculation.util import __version__ as version # noqa
 
 INSTALL_REQUIRES = [
     'numpy',
