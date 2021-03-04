@@ -30,3 +30,4 @@ class Iterator:
                 if abs(prv - cur) > 1:
                     prv = None
             yield prv, cur, None
+

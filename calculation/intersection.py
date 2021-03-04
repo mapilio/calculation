@@ -1,13 +1,69 @@
+from calculation.distance import Distance
+from calculation.pixel import Pixel
+from addict import Dict
+
+
 class Intersection:
 
-    def ruleSet(self, c):
+    def __init__(self, **kwargs):
+
+        data = Dict(kwargs)
+        self.intersection_lineLength = data.intersection_lineLength
+        self.intersection_angle_wide = data.angle_wide
+
+    @staticmethod
+    def ruleSet(c):
         confidence_rate = (1 - 1 / c) if c else "{} can't null".format({c})
 
         return confidence_rate
 
-    @classmethod
-    def checkLineIntersection(self, line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX,
-                              line2EndY):
+    @staticmethod
+    def angle_between(n, a, b):
+        ## n = chech between a and b parameter
+        ## a start point angle
+        ## b finish point angle
+        n = int(n)
+        a = int(a)
+        b = int(b)
+        n = (360 + (n % 360)) % 360
+        a = (3600000 + a) % 360
+        b = (3600000 + b) % 360
+        if a < b:
+            return a <= n and n <= b
+        return a <= n or n <= b
+
+    def calcBetw(self, n):
+        # n = heading
+        # a = angle
+        a = self.intersection_angle_wide
+        t = 360 + n
+        x = (-(a - t)) % 360
+        y = (a + t) % 360
+        # x, y hands of angle
+        return x, y
+
+    def opsDetect(self, location):
+        # location noktaların bulunduğu konum
+        # config ise burada line uzunluğunu belirtmek için, config dosyasından değiştirdiğimizde otomatik değişmesini sağlıyor.
+        ops = []
+        for i in range(0, len(location), 3):
+            ops.append(Distance.destinationPoint(location[i], location[i + 1], self.intersection_lineLength,
+                                                 location[i + 2]))
+
+        return ops[0], ops[1]
+
+    def checkLineIntersection(self, **kwargs):
+
+        points = Dict(kwargs)
+        line1StartX = points.line1StartX
+        line1StartY = points.line1StartY
+        line1EndX = points.line1EndX
+        line1EndY = points.line1EndY
+        line2StartX = points.line2StartX
+        line2StartY = points.line2StartY
+        line2EndX = points.line2EndX
+        line2EndY = points.line2EndY
+
         result = {
             "x": "null",
             "y": "null",
@@ -15,8 +71,24 @@ class Intersection:
             "l2": False,
         }
 
+        # We check whether any variable is decimal or not,
+        # because the heading calculation in requests from the web can be decimal,
+        # and the one from the database can be decimal.
+        if isinstance(line1StartX, float):
+            line1StartX, line1StartY, \
+            line2StartX, line2StartY = self.intersection_float_to_decimal(line1StartX,
+                                                                          line1StartY,
+                                                                          line2StartX, line2StartY)
+        if isinstance(line1EndX, float):
+            line1EndX, line1EndY, \
+            line2EndX, line2EndY = self.intersection_float_to_decimal(line1EndX,
+                                                                      line1EndY,
+                                                                      line2EndX,
+                                                                      line2EndY)
+
         denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - (
                 (line2EndX - line2StartX) * (line1EndY - line1StartY))
+
         if (denominator == 0):
             return result
 
@@ -123,16 +195,19 @@ class Intersection:
             return False
         # return the intersection over union value
 
-    @classmethod
-    def IntersectionPointsFind(self, m, start_lat1, start_lon1, theta1, start_lat2, start_lon2, theta2, cfg):
-        ops1, ops2 = m.opsDetect([start_lat1, start_lon1, theta1,
-                                  start_lat2, start_lon2, theta2],
-                                 cfg)
+    def IntersectionPointsFind(self, **kwargs):
 
-        intSection1Lat, intSection1Lon, intSection2Lat, intSection2Lon = m.interSections(ops1["lat"],
-                                                                                         ops1["lon"],
-                                                                                         ops2["lat"],
-                                                                                         ops2["lon"])
+        points = Dict(kwargs)
+        start_lat1 = points.start_lat1
+        start_lon1 = points.start_lon1
+        theta1 = points.theta1
+        start_lat2 = points.start_lat2
+        start_lon2 = points.start_lon2
+        theta2 = points.theta2
+
+        ops1, ops2 = self.opsDetect([start_lat1, start_lon1, theta1,
+                                     start_lat2, start_lon2, theta2],
+                                    )
 
         destinationPoint1 = [(start_lat1, start_lon1),
                              (ops1["lat"], ops1["lon"])]
@@ -140,12 +215,56 @@ class Intersection:
         destinationPoint2 = [(start_lat2, start_lon2),
                              (ops2["lat"], ops2["lon"])]
 
-        interSection = self.checkLineIntersection(start_lat1,
-                                                   start_lon1,
-                                                   intSection1Lat, intSection1Lon,
+        interSection = self.checkLineIntersection(line1StartX=start_lat1,
+                                                  line1StartY=start_lon1,
+                                                  line1EndX=ops1["lat"],
+                                                  line1EndY=ops1["lon"],
 
-                                                   start_lat2,
-                                                   start_lon2,
-                                                   intSection2Lat, intSection2Lon)
+                                                  line2StartX=start_lat2,
+                                                  line2StartY=start_lon2,
+                                                  line2EndX=ops2["lat"],
+                                                  line2EndY=ops2["lon"])
 
         return interSection, destinationPoint1, destinationPoint2
+
+    @staticmethod
+    def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
+        """
+
+        Parameters
+        ----------
+        lat1
+        lon1
+        lat2
+        lon2
+
+        Returns points convert decimal format
+        -------
+
+        """
+        lat1 = Pixel.decimalFix(lat1)
+        lon1 = Pixel.decimalFix(lon1)
+        lat2 = Pixel.decimalFix(lat2)
+        lon2 = Pixel.decimalFix(lon2)
+        return lat1, lon1, lat2, lon2
+
+    @staticmethod
+    def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
+        """
+
+        Parameters
+        ----------
+        lat1
+        lon1
+        lat2
+        lon2
+
+        Returns points convert decimal format
+        -------
+
+        """
+        lat1 = Pixel.decimalFix(lat1)
+        lon1 = Pixel.decimalFix(lon1)
+        lat2 = Pixel.decimalFix(lat2)
+        lon2 = Pixel.decimalFix(lon2)
+        return lat1, lon1, lat2, lon2

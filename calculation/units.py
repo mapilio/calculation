@@ -4,6 +4,7 @@ TO_RAD = math.pi / 180
 TO_DEG = 180 / math.pi
 RADIUS = 6371e3  # Radius of earth in kilometers. Use 3956 for miles
 
+
 # Angles
 def degrees(radians=0, arcminutes=0, arcseconds=0):
     """
