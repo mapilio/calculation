@@ -4,6 +4,8 @@ from trianglesolver import solve, degree
 import numpy
 import math
 
+from addict import Dict
+
 
 class Distance:
 
@@ -11,7 +13,7 @@ class Distance:
         pass
 
     @staticmethod
-    def checkValidity(a, b, c):
+    def checkValidity(a: float, b: float, c: float) -> bool:
         """
         Triangle rule checks
         it's triangle edged as a, b, c
@@ -31,7 +33,24 @@ class Distance:
                 return False
         return True
 
-    def bearing(self, startLat, startLon, destLat, destLon):
+    @staticmethod
+    def bearing(**kwargs):
+        """
+        Calculate bearing(direction) from two points
+
+        :param startLat:
+        :param startLon:
+        :param destLat:
+        :param destLon:
+        :return:
+        """
+
+        points = Dict(kwargs)
+        startLat = points.startLat
+        startLon = points.startLon
+        destLat = points.destLat
+        destLon = points.destLon
+
         phi1 = radians(startLat)
         phi2 = radians(destLat)
         cosPhi2 = cos(phi2)
@@ -41,11 +60,24 @@ class Distance:
         print(aci * TO_DEG)
         return aci * TO_DEG
 
-    def haversine(self, lon1, lat1, lon2, lat2):
+    @staticmethod
+    def haversine(**kwargs):
         """
         Calculate the great circle distance between two points
         on the earth (specified in decimal degrees)
+
+        :param lon1:
+        :param lat1:
+        :param lon2:
+        :param lat2:
+        :return:
         """
+        points = Dict(kwargs)
+        lon1 = points.lon1
+        lat1 = points.lat1
+        lon2 = points.lon2
+        lat2 = points.lat2
+
         # convert decimal degrees to radians
         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
@@ -58,18 +90,30 @@ class Distance:
         return c * RADIUS
 
     @staticmethod
-    def destinationPoint(lat1, lon1, distance, bearing):
+    def destination_point(**kwargs):
+        """
+        :lat :
+        :lon :
+        :distance :
+        bearing :
+        """
+        params = Dict(kwargs)
+        lat = params.lat
+        lon = params.lon
+        distance = params.distance
+        bearing = params.bearing
+
         δ = distance / RADIUS
         θ = bearing * TO_RAD
-        φ1 = radians(lat1)
-        λ1 = radians(lon1)
+        φ1 = radians(lat)
+        λ1 = radians(lon)
         φ2 = asin(sin(φ1) * cos(δ) + cos(φ1) * sin(δ) * cos(θ))
         λ2 = λ1 + atan2(sin(θ) * sin(δ) * cos(φ1), cos(δ) - sin(φ1) * sin(φ2))
         λ2 = (λ2 + 3 * pi) % (2 * pi) - pi
 
         return {"lat": φ2 * TO_DEG, "lon": λ2 * TO_DEG}
 
-    def checkTriangleRule(self, cornerA, cornerB, cornerC) -> bool:
+    def check_triangle_rule(self, cornerA, cornerB, cornerC) -> bool:
         """
         triangle rule
         abs(edgeA - edgeB) < edgeC < edgeA + edgeB
@@ -95,7 +139,7 @@ class Distance:
         return self.checkValidity(edgeAB, edgeAC, edgeBC)
 
     @staticmethod
-    def checkBBoxDistance(box, cfg):
+    def check_bbox_distance(box, cfg):
         xmin, ymin, xmax, ymax = list(map(int, box))
         # print("Y Distances = ",np.abs(ymax-ymin),
         #       "X Distances = ", np.abs(xmax-xmin))
@@ -105,7 +149,9 @@ class Distance:
             return False
         return True
 
-    def LineToXYs(self, line):  # return first and last coordinates
+    @staticmethod
+    def line_to_XYs(line):
+        # return first and last coordinates
         firstX, firstY = (line.firstPoint.X, line.firstPoint.Y)
         lastX, lastY = (line.lastPoint.X, line.lastPoint.Y)
         return [(firstX, firstY), (lastX, lastY)]
@@ -150,118 +196,17 @@ class Distance:
         return compass_bearing
 
     @staticmethod
-    def calculate_initial_compass_bearing(pointA, pointB):
-        """
-        Calculates the bearing between two points.
-        The formulae used is the following:
-            θ = atan2(sin(Δlong).cos(lat2),
-                      cos(lat1).sin(lat2) − sin(lat1).cos(lat2).cos(Δlong))
-        :Parameters:
-          - `pointA: The tuple representing the latitude/longitude for the
-            first point. Latitude and longitude must be in decimal degrees
-          - `pointB: The tuple representing the latitude/longitude for the
-            second point. Latitude and longitude must be in decimal degrees
-        :Returns:
-          The bearing in degrees
-        :Returns Type:
-          float
-        """
-        if (type(pointA) != tuple) or (type(pointB) != tuple):
-            raise TypeError("Only tuples are supported as arguments")
+    def distance_between_points(origin, destination):
 
-        lat1 = math.radians(pointA[0])
-        lat2 = math.radians(pointB[0])
+        lat1, lon1 = origin
+        lat2, lon2 = destination
+        radius = 6371  # km
 
-        diffLong = math.radians(pointB[1] - pointA[1])
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(math.radians(lat1)) \
+            * math.cos(math.radians(lat2)) * math.sin(dlon / 2) * math.sin(dlon / 2)
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        d = radius * c
 
-        x = math.sin(diffLong) * math.cos(lat2)
-        y = math.cos(lat1) * math.sin(lat2) - (math.sin(lat1)
-                                               * math.cos(lat2) * math.cos(diffLong))
-
-        initial_bearing = math.atan2(x, y)
-
-        # Now we have the initial bearing but math.atan2 return values
-        # from -180° to + 180° which is not what we want for a compass bearing
-        # The solution is to normalize the initial bearing as shown below
-        initial_bearing = math.degrees(initial_bearing)
-        compass_bearing = (initial_bearing + 360) % 360
-
-        return compass_bearing
-
-    @staticmethod
-    def calculate_initial_compass_bearing(pointA, pointB):
-        """
-        Calculates the bearing between two points.
-        The formulae used is the following:
-            θ = atan2(sin(Δlong).cos(lat2),
-                      cos(lat1).sin(lat2) − sin(lat1).cos(lat2).cos(Δlong))
-        :Parameters:
-          - `pointA: The tuple representing the latitude/longitude for the
-            first point. Latitude and longitude must be in decimal degrees
-          - `pointB: The tuple representing the latitude/longitude for the
-            second point. Latitude and longitude must be in decimal degrees
-        :Returns:
-          The bearing in degrees
-        :Returns Type:
-          float
-        """
-        if (type(pointA) != tuple) or (type(pointB) != tuple):
-            raise TypeError("Only tuples are supported as arguments")
-
-        lat1 = math.radians(pointA[0])
-        lat2 = math.radians(pointB[0])
-
-        diffLong = math.radians(pointB[1] - pointA[1])
-
-        x = math.sin(diffLong) * math.cos(lat2)
-        y = math.cos(lat1) * math.sin(lat2) - (math.sin(lat1)
-                                               * math.cos(lat2) * math.cos(diffLong))
-
-        initial_bearing = math.atan2(x, y)
-
-        # Now we have the initial bearing but math.atan2 return values
-        # from -180° to + 180° which is not what we want for a compass bearing
-        # The solution is to normalize the initial bearing as shown below
-        initial_bearing = math.degrees(initial_bearing)
-        compass_bearing = (initial_bearing + 360) % 360
-
-        return compass_bearing
-
-    @staticmethod
-    def calculate_initial_compass_bearing(pointA, pointB):
-        """
-        Calculates the bearing between two points.
-        The formulae used is the following:
-            θ = atan2(sin(Δlong).cos(lat2),
-                      cos(lat1).sin(lat2) − sin(lat1).cos(lat2).cos(Δlong))
-        :Parameters:
-          - `pointA: The tuple representing the latitude/longitude for the
-            first point. Latitude and longitude must be in decimal degrees
-          - `pointB: The tuple representing the latitude/longitude for the
-            second point. Latitude and longitude must be in decimal degrees
-        :Returns:
-          The bearing in degrees
-        :Returns Type:
-          float
-        """
-        if (type(pointA) != tuple) or (type(pointB) != tuple):
-            raise TypeError("Only tuples are supported as arguments")
-
-        lat1 = math.radians(pointA[0])
-        lat2 = math.radians(pointB[0])
-
-        diffLong = math.radians(pointB[1] - pointA[1])
-
-        x = math.sin(diffLong) * math.cos(lat2)
-        y = math.cos(lat1) * math.sin(lat2) - (math.sin(lat1)
-                                               * math.cos(lat2) * math.cos(diffLong))
-
-        initial_bearing = math.atan2(x, y)
-
-        # Now we have the initial bearing but math.atan2 return values
-        # from -180° to + 180° which is not what we want for a compass bearing
-        # The solution is to normalize the initial bearing as shown below
-        initial_bearing = math.degrees(initial_bearing)
-        compass_bearing = (initial_bearing + 360) % 360
-
-        return compass_bearing
+        return d

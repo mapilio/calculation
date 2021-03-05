@@ -2,6 +2,8 @@ from calculation.distance import Distance
 from calculation.pixel import Pixel
 from addict import Dict
 
+from helper.convertor import Convertor
+
 
 class Intersection:
 
@@ -12,7 +14,7 @@ class Intersection:
         self.intersection_angle_wide = data.angle_wide
 
     @staticmethod
-    def ruleSet(c):
+    def confidence_rule(c):
         confidence_rate = (1 - 1 / c) if c else "{} can't null".format({c})
 
         return confidence_rate
@@ -32,7 +34,7 @@ class Intersection:
             return a <= n and n <= b
         return a <= n or n <= b
 
-    def calcBetw(self, n):
+    def calc_between_heading_angle(self, n):
         # n = heading
         # a = angle
         a = self.intersection_angle_wide
@@ -42,17 +44,21 @@ class Intersection:
         # x, y hands of angle
         return x, y
 
-    def opsDetect(self, location):
-        # location noktaların bulunduğu konum
-        # config ise burada line uzunluğunu belirtmek için, config dosyasından değiştirdiğimizde otomatik değişmesini sağlıyor.
+    def ops_detect(self, loc):
+        """
+        location location of points
+        intersection_lineLength: on the other hand, allows it to change automatically
+        when we change it from the config file to specify the line length here.
+        """
         ops = []
-        for i in range(0, len(location), 3):
-            ops.append(Distance.destinationPoint(location[i], location[i + 1], self.intersection_lineLength,
-                                                 location[i + 2]))
+        for i in range(0, len(loc), 3):
+            ops.append(Distance.destination_point(loc[i], loc[i + 1], self.intersection_lineLength,
+                                                  loc[i + 2]))
 
         return ops[0], ops[1]
 
-    def checkLineIntersection(self, **kwargs):
+    @staticmethod
+    def check_line_intersection(**kwargs):
 
         points = Dict(kwargs)
         line1StartX = points.line1StartX
@@ -76,12 +82,12 @@ class Intersection:
         # and the one from the database can be decimal.
         if isinstance(line1StartX, float):
             line1StartX, line1StartY, \
-            line2StartX, line2StartY = self.intersection_float_to_decimal(line1StartX,
+            line2StartX, line2StartY = Convertor.intersection_float_to_decimal(line1StartX,
                                                                           line1StartY,
                                                                           line2StartX, line2StartY)
         if isinstance(line1EndX, float):
             line1EndX, line1EndY, \
-            line2EndX, line2EndY = self.intersection_float_to_decimal(line1EndX,
+            line2EndX, line2EndY = Convertor.intersection_float_to_decimal(line1EndX,
                                                                       line1EndY,
                                                                       line2EndX,
                                                                       line2EndY)
@@ -89,7 +95,7 @@ class Intersection:
         denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - (
                 (line2EndX - line2StartX) * (line1EndY - line1StartY))
 
-        if (denominator == 0):
+        if denominator == 0:
             return result
 
         a = line1StartY - line2StartY
@@ -103,18 +109,17 @@ class Intersection:
         result['x'] = line1StartX + (a * (line1EndX - line1StartX))
         result['y'] = line1StartY + (a * (line1EndY - line1StartY))
 
-        if (a > 0 and a < 1):
+        if 0 < a < 1:
             result["l1"] = True
 
-        if (b > 0 and b < 1):
+        if 0 < b < 1:
             result["l2"] = True
 
         return result
 
-    @classmethod
-    def intersectionAverage(self, AveragePoint):
-        averagePoint = []
-        for keys, values in AveragePoint.items():
+    def intersection_points_average(self, averagePoint):
+        averagePoint_arr = []
+        for keys, values in averagePoint.items():
             total = {'Lat_center': 0, 'Lon_center': 0,
                      'Lat_cornerA': 0, 'Lon_cornerA': 0,
                      'Lat_cornerB': 0, 'Lon_cornerB': 0,
@@ -125,7 +130,7 @@ class Intersection:
                      'point': 0, 'match_id': 0, 'detectedObjectPath': None,
                      'imgUrl': None}
             c = len(values)
-            confidence = self.ruleSet(c)
+            confidence = self.confidence_rule(c)
 
             # TODO refactor
             for j in range(c):
@@ -166,36 +171,11 @@ class Intersection:
             total['avg_score'] = (total['score'] / c)
             total['point'] = (total['avg_score'] + confidence) * 0.5
             total['isValid'] = c > 1
-            averagePoint.append(total)
+            averagePoint_arr.append(total)
 
-        return averagePoint
+        return averagePoint_arr
 
-    @classmethod
-    def bb_intersection_over_union(self, boxA, boxB):
-        # determine the (x, y)-coordinates of the intersection rectangle
-        xA = max(boxA[0], boxB[0])
-        yA = max(boxA[1], boxB[1])
-        xB = min(boxA[2], boxB[2])
-        yB = min(boxA[3], boxB[3])
-        # compute the area of intersection rectangle
-        interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
-        # compute the area of both the prediction and ground-truth
-        # rectangles
-        boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
-        boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
-        # compute the intersection over union by taking the intersection
-        # area and dividing it by the sum of prediction + ground-truth
-        # areas - the interesection area
-        iou = interArea / float(boxAArea + boxBArea - interArea)
-        # print(iou, "iou")
-        # exit(1)
-        if iou > 0.4:
-            return True
-        else:
-            return False
-        # return the intersection over union value
-
-    def IntersectionPointsFind(self, **kwargs):
+    def intersection_points_find(self, **kwargs):
 
         points = Dict(kwargs)
         start_lat1 = points.start_lat1
@@ -205,9 +185,8 @@ class Intersection:
         start_lon2 = points.start_lon2
         theta2 = points.theta2
 
-        ops1, ops2 = self.opsDetect([start_lat1, start_lon1, theta1,
-                                     start_lat2, start_lon2, theta2],
-                                    )
+        ops1, ops2 = self.ops_detect([start_lat1, start_lon1, theta1,
+                                     start_lat2, start_lon2, theta2])
 
         destinationPoint1 = [(start_lat1, start_lon1),
                              (ops1["lat"], ops1["lon"])]
@@ -215,56 +194,15 @@ class Intersection:
         destinationPoint2 = [(start_lat2, start_lon2),
                              (ops2["lat"], ops2["lon"])]
 
-        interSection = self.checkLineIntersection(line1StartX=start_lat1,
-                                                  line1StartY=start_lon1,
-                                                  line1EndX=ops1["lat"],
-                                                  line1EndY=ops1["lon"],
+        interSection = self.check_line_intersection(line1StartX=start_lat1,
+                                                    line1StartY=start_lon1,
+                                                    line1EndX=ops1["lat"],
+                                                    line1EndY=ops1["lon"],
 
-                                                  line2StartX=start_lat2,
-                                                  line2StartY=start_lon2,
-                                                  line2EndX=ops2["lat"],
-                                                  line2EndY=ops2["lon"])
+                                                    line2StartX=start_lat2,
+                                                    line2StartY=start_lon2,
+                                                    line2EndX=ops2["lat"],
+                                                    line2EndY=ops2["lon"])
 
         return interSection, destinationPoint1, destinationPoint2
 
-    @staticmethod
-    def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
-        """
-
-        Parameters
-        ----------
-        lat1
-        lon1
-        lat2
-        lon2
-
-        Returns points convert decimal format
-        -------
-
-        """
-        lat1 = Pixel.decimalFix(lat1)
-        lon1 = Pixel.decimalFix(lon1)
-        lat2 = Pixel.decimalFix(lat2)
-        lon2 = Pixel.decimalFix(lon2)
-        return lat1, lon1, lat2, lon2
-
-    @staticmethod
-    def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
-        """
-
-        Parameters
-        ----------
-        lat1
-        lon1
-        lat2
-        lon2
-
-        Returns points convert decimal format
-        -------
-
-        """
-        lat1 = Pixel.decimalFix(lat1)
-        lon1 = Pixel.decimalFix(lon1)
-        lat2 = Pixel.decimalFix(lat2)
-        lon2 = Pixel.decimalFix(lon2)
-        return lat1, lon1, lat2, lon2

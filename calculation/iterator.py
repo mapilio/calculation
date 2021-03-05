@@ -13,7 +13,6 @@ class Iterator:
         try:
             while True:
                 nxt = iterable.__next__()
-                # print(abs(cur - prv) <= 1)
                 if abs(cur - nxt) > 1:
                     data = None
                 else:
