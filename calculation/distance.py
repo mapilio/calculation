@@ -90,18 +90,13 @@ class Distance:
         return c * RADIUS
 
     @staticmethod
-    def destination_point(**kwargs):
+    def destination_point(lat, lon, distance, bearing):
         """
         :lat :
         :lon :
         :distance :
         bearing :
         """
-        params = Dict(kwargs)
-        lat = params.lat
-        lon = params.lon
-        distance = params.distance
-        bearing = params.bearing
 
         δ = distance / RADIUS
         θ = bearing * TO_RAD
@@ -129,12 +124,12 @@ class Distance:
 
         """
 
-        edgeAB = (self.haversine(cornerA[0], cornerA[1],
-                                 cornerB[0], cornerB[1])) * 1000
-        edgeAC = (self.haversine(cornerA[0], cornerA[1],
-                                 cornerC[0], cornerC[1])) * 1000
-        edgeBC = (self.haversine(cornerB[0], cornerB[1],
-                                 cornerC[0], cornerC[1])) * 1000
+        edgeAB = (self.haversine(lon1=cornerA[0], lat1=cornerA[1],
+                                 lon2=cornerB[0], lat2=cornerB[1])) * 1000
+        edgeAC = (self.haversine(lon1=cornerA[0], lat1=cornerA[1],
+                                 lon2=cornerC[0], lat2=cornerC[1])) * 1000
+        edgeBC = (self.haversine(lon1=cornerB[0], lat1=cornerB[1],
+                                 lon2=cornerC[0], lat2=cornerC[1])) * 1000
 
         return self.checkValidity(edgeAB, edgeAC, edgeBC)
 

@@ -8,7 +8,7 @@ from helper.convertor import Convertor
 class Intersection:
 
     def __init__(self, **kwargs):
-
+        self.convertor = Convertor
         params = Dict(kwargs)
         self.intersection_lineLength = params.intersection_lineLength
         self.intersection_angle_wide = params.angle_wide
@@ -52,13 +52,12 @@ class Intersection:
         """
         ops = []
         for i in range(0, len(loc), 3):
-            ops.append(Distance.destination_point(loc[i], loc[i + 1], self.intersection_lineLength,
-                                                  loc[i + 2]))
+            ops.append(Distance.destination_point(lat=loc[i], lon=loc[i + 1], distance=self.intersection_lineLength,
+                                                  bearing=loc[i + 2]))
 
         return ops[0], ops[1]
 
-    @staticmethod
-    def check_line_intersection(**kwargs):
+    def check_line_intersection(self, **kwargs):
 
         points = Dict(kwargs)
         line1StartX = points.line1StartX
@@ -82,15 +81,15 @@ class Intersection:
         # and the one from the database can be decimal.
         if isinstance(line1StartX, float):
             line1StartX, line1StartY, \
-            line2StartX, line2StartY = Convertor.intersection_float_to_decimal(line1StartX,
-                                                                          line1StartY,
-                                                                          line2StartX, line2StartY)
+            line2StartX, line2StartY = self.convertor.intersection_float_to_decimal(line1StartX,
+                                                                                    line1StartY,
+                                                                                    line2StartX, line2StartY)
         if isinstance(line1EndX, float):
             line1EndX, line1EndY, \
-            line2EndX, line2EndY = Convertor.intersection_float_to_decimal(line1EndX,
-                                                                      line1EndY,
-                                                                      line2EndX,
-                                                                      line2EndY)
+            line2EndX, line2EndY = self.convertor.intersection_float_to_decimal(line1EndX,
+                                                                                line1EndY,
+                                                                                line2EndX,
+                                                                                line2EndY)
 
         denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - (
                 (line2EndX - line2StartX) * (line1EndY - line1StartY))
@@ -130,7 +129,7 @@ class Intersection:
                      'point': 0, 'match_id': 0, 'detectedObjectPath': None,
                      'imgUrl': None}
             c = len(values)
-            confidence = self.confidence_rule(c)
+            confidence = self.apply_confidence_rule(c)
 
             # TODO refactor
             for j in range(c):
@@ -185,8 +184,8 @@ class Intersection:
         start_lon2 = points.start_lon2
         theta2 = points.theta2
 
-        ops1, ops2 = self.ops_detect([start_lat1, start_lon1, theta1,
-                                     start_lat2, start_lon2, theta2])
+        ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
+                                          start_lat2, start_lon2, theta2])
 
         destinationPoint1 = [(start_lat1, start_lon1),
                              (ops1["lat"], ops1["lon"])]
