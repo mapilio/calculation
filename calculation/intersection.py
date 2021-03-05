@@ -9,12 +9,12 @@ class Intersection:
 
     def __init__(self, **kwargs):
 
-        data = Dict(kwargs)
-        self.intersection_lineLength = data.intersection_lineLength
-        self.intersection_angle_wide = data.angle_wide
+        params = Dict(kwargs)
+        self.intersection_lineLength = params.intersection_lineLength
+        self.intersection_angle_wide = params.angle_wide
 
     @staticmethod
-    def confidence_rule(c):
+    def apply_confidence_rule(c):
         confidence_rate = (1 - 1 / c) if c else "{} can't null".format({c})
 
         return confidence_rate
