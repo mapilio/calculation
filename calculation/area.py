@@ -1,6 +1,3 @@
-from geopy.distance import geodesic
-
-
 class Area:
 
     # Deprecated

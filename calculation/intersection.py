@@ -2,13 +2,10 @@ from calculation.distance import Distance
 from calculation.pixel import Pixel
 from addict import Dict
 
-from helper.convertor import Convertor
-
 
 class Intersection:
 
     def __init__(self, **kwargs):
-        self.convertor = Convertor
         params = Dict(kwargs)
         self.intersection_lineLength = params.intersection_lineLength
         self.intersection_angle_wide = params.angle_wide
@@ -81,12 +78,12 @@ class Intersection:
         # and the one from the database can be decimal.
         if isinstance(line1StartX, float):
             line1StartX, line1StartY, \
-            line2StartX, line2StartY = self.convertor.intersection_float_to_decimal(line1StartX,
+            line2StartX, line2StartY = intersection_float_to_decimal(line1StartX,
                                                                                     line1StartY,
                                                                                     line2StartX, line2StartY)
         if isinstance(line1EndX, float):
             line1EndX, line1EndY, \
-            line2EndX, line2EndY = self.convertor.intersection_float_to_decimal(line1EndX,
+            line2EndX, line2EndY = intersection_float_to_decimal(line1EndX,
                                                                                 line1EndY,
                                                                                 line2EndX,
                                                                                 line2EndY)
@@ -205,3 +202,27 @@ class Intersection:
 
         return interSection, destinationPoint1, destinationPoint2
 
+def decimal_fix(number):
+    getcontext().rounding = ROUND_DOWN
+    return Decimal(number).quantize(Decimal(10) ** -9)
+
+def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
+    """
+
+    Parameters
+    ----------
+    lat1
+    lon1
+    lat2
+    lon2
+
+    Returns points convert decimal format
+    -------
+
+    """
+    lat1 = decimal_fix(lat1)
+    lon1 = decimal_fix(lon1)
+    lat2 = decimal_fix(lat2)
+    lon2 = decimal_fix(lon2)
+
+    return lat1, lon1, lat2, lon2
