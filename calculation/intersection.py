@@ -1,7 +1,7 @@
 from calculation.distance import Distance
 from calculation.pixel import Pixel
 from addict import Dict
-
+from decimal import Decimal, ROUND_DOWN, getcontext
 
 class Intersection:
 
