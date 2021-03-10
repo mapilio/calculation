@@ -3,8 +3,8 @@ from decimal import Decimal
 
 NUMBER_TYPES = (int, float, Decimal)
 
-__version__ = "0.1.8"
-__version_info__ = (0, 1, 8)
+__version__ = "0.1.9"
+__version_info__ = (0, 1, 9)
 
 logger = logging.getLogger('calculation')
 
