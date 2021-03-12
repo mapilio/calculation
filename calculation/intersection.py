@@ -3,12 +3,18 @@ from calculation.pixel import Pixel
 from addict import Dict
 from decimal import Decimal, ROUND_DOWN, getcontext
 
+
 class Intersection:
 
     def __init__(self, **kwargs):
-        params = Dict(kwargs)
-        self.intersection_lineLength = params.intersection_lineLength
-        self.intersection_angle_wide = params.angle_wide
+        """
+        intersection_lineLength=self.config.intersection.lineLength,
+        angle_wide=self.config.intersection.angle_wide
+        """
+        self.__dict__.update(kwargs)
+
+        self.intersection_lineLength = self.intersection_rule.lineLength
+        self.intersection_angle_wide = self.intersection_rule.angle_wide
 
     @staticmethod
     def apply_confidence_rule(c):
@@ -79,14 +85,14 @@ class Intersection:
         if isinstance(line1StartX, float):
             line1StartX, line1StartY, \
             line2StartX, line2StartY = intersection_float_to_decimal(line1StartX,
-                                                                                    line1StartY,
-                                                                                    line2StartX, line2StartY)
+                                                                     line1StartY,
+                                                                     line2StartX, line2StartY)
         if isinstance(line1EndX, float):
             line1EndX, line1EndY, \
             line2EndX, line2EndY = intersection_float_to_decimal(line1EndX,
-                                                                                line1EndY,
-                                                                                line2EndX,
-                                                                                line2EndY)
+                                                                 line1EndY,
+                                                                 line2EndX,
+                                                                 line2EndY)
 
         denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - (
                 (line2EndX - line2StartX) * (line1EndY - line1StartY))
@@ -202,9 +208,11 @@ class Intersection:
 
         return interSection, destinationPoint1, destinationPoint2
 
+
 def decimal_fix(number):
     getcontext().rounding = ROUND_DOWN
     return Decimal(number).quantize(Decimal(10) ** -9)
+
 
 def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
     """
