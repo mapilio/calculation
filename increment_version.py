@@ -31,9 +31,9 @@ def new_version(package: str, major: bool=False, minor:bool=False, patch:bool=Tr
     r = urllib.request.urlopen(req)
     if r.code == 200:
         t = json.loads(r.read())
-        releases = t.get('releases', [])
+        releases = t['info']['version']
         if releases:
-            results = list(map(int, sorted(releases)[-1].split(".")))
+            results = list(map(int, releases.split(".")))
             return update_version(results,major,minor,patch)
 
 
