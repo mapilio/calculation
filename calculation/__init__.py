@@ -13,4 +13,4 @@ from .intersection import Intersection
 from .iterator import Iterator
 from .pixel import Pixel
 
-from .util import __version__, __version_info__, get_version
+from .util import __version__, __major__, __minor__, __patch__
