@@ -38,4 +38,3 @@ def new_version(package: str, major: bool=False, minor:bool=False, patch:bool=Tr
 
 
 __version__ = new_version(name, major, minor, patch)
-print(__version__)
