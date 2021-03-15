@@ -186,27 +186,46 @@ class Intersection:
         start_lat2 = points.start_lat2
         start_lon2 = points.start_lon2
         theta2 = points.theta2
+        type = points.type
 
-        ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
-                                          start_lat2, start_lon2, theta2])
+        if type == "center":
+            ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
+                                              start_lat2, start_lon2, theta2])
 
-        destinationPoint1 = [(start_lat1, start_lon1),
-                             (ops1["lat"], ops1["lon"])]
+            destinationPoint1 = [(start_lat1, start_lon1),
+                                 (ops1["lat"], ops1["lon"])]
 
-        destinationPoint2 = [(start_lat2, start_lon2),
-                             (ops2["lat"], ops2["lon"])]
+            destinationPoint2 = [(start_lat2, start_lon2),
+                                 (ops2["lat"], ops2["lon"])]
 
-        interSection = self.check_line_intersection(line1StartX=start_lat1,
-                                                    line1StartY=start_lon1,
-                                                    line1EndX=ops1["lat"],
-                                                    line1EndY=ops1["lon"],
+            interSection = self.check_line_intersection(line1StartX=start_lat1,
+                                                        line1StartY=start_lon1,
+                                                        line1EndX=ops1["lat"],
+                                                        line1EndY=ops1["lon"],
 
-                                                    line2StartX=start_lat2,
-                                                    line2StartY=start_lon2,
-                                                    line2EndX=ops2["lat"],
-                                                    line2EndY=ops2["lon"])
+                                                        line2StartX=start_lat2,
+                                                        line2StartY=start_lon2,
+                                                        line2EndX=ops2["lat"],
+                                                        line2EndY=ops2["lon"])
+            return interSection, destinationPoint1, destinationPoint2
+        if type == "corner":
+            interSectionPoints = []
+            for first, second in zip(theta1, theta2):
+                ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, first,
+                                                  start_lat2, start_lon2, second])
 
-        return interSection, destinationPoint1, destinationPoint2
+                interSection = self.check_line_intersection(line1StartX=start_lat1,
+                                                            line1StartY=start_lon1,
+                                                            line1EndX=ops1["lat"],
+                                                            line1EndY=ops1["lon"],
+
+                                                            line2StartX=start_lat2,
+                                                            line2StartY=start_lon2,
+                                                            line2EndX=ops2["lat"],
+                                                            line2EndY=ops2["lon"])
+                interSectionPoints.append(interSection)
+
+            return interSectionPoints
 
 
 def decimal_fix(number):
