@@ -1,7 +1,7 @@
 from calculation.distance import Distance
-from calculation.pixel import Pixel
 from addict import Dict
 from decimal import Decimal, ROUND_DOWN, getcontext
+import collections
 
 
 class Intersection:
@@ -119,63 +119,74 @@ class Intersection:
 
         return result
 
-    def intersection_points_average(self, averagePoint):
-        averagePoint_arr = []
-        for keys, values in averagePoint.items():
-            total = {'Lat_center': 0, 'Lon_center': 0,
-                     'Lat_cornerA': 0, 'Lon_cornerA': 0,
-                     'Lat_cornerB': 0, 'Lon_cornerB': 0,
-                     'Lat_cornerC': 0, 'Lon_cornerC': 0,
-                     'score': 0, 'isValid': 0,
-                     'avg_score': 0,
-                     'area': 0,
-                     'point': 0, 'match_id': 0, 'detectedObjectPath': None,
-                     'imgUrl': None}
-            c = len(values)
-            confidence = self.apply_confidence_rule(c)
+    def intersection_points_average(self, groupMatches, geoFunc):
+        total = Dict({})
+        total['isValid'] = False
+        mergedPoints = []
+        objects = collections.defaultdict(list)
+        i = 0
+        confidence = 0
+        for matches in groupMatches:
+            i += 2
+            k = Dict(matches)
+            objects['Lat_center'].append(float(k.intersectCenter['x']))
+            objects['Lon_center'].append(float(k.intersectCenter['y']))
 
-            # TODO refactor
-            for j in range(c):
-                total['classname'] = values[j][1]
-                total['score'] += values[j][2]
-                total['imgid'] = values[j][3]
+            objects['Lat_cornerA'].append(float(k.intersectCornerA['x']))
+            objects['Lon_cornerA'].append(float(k.intersectCornerA['y']))
 
-                total['Lat_center'] += float(values[j][4])
-                total['Lon_center'] += float(values[j][5])
+            objects['Lat_cornerB'].append(float(k.intersectCornerB['x']))
+            objects['Lon_cornerB'].append(float(k.intersectCornerB['y']))
 
-                total['Lat_cornerA'] += float(values[j][6])
-                total['Lon_cornerA'] += float(values[j][7])
+            objects['Lat_cornerC'].append(float(k.intersectCornerC['x']))
+            objects['Lon_cornerC'].append(float(k.intersectCornerC['y']))
 
-                total['Lat_cornerB'] += float(values[j][8])
-                total['Lon_cornerB'] += float(values[j][9])
+            objects['avg_score'].append(float(k.score_1))
+            objects['avg_score'].append(float(k.score_2))
 
-                total['Lat_cornerC'] += float(values[j][10])
-                total['Lon_cornerC'] += float(values[j][11])
+            total['detectedPath_1'] = k.detectedPath_1
+            total['detectedPath_2'] = k.detectedPath_2
 
-                total['detectedObjectPath'] = values[j][12]
-                total['imgUrl'] = values[j][13]
+            total['imgUrl_1'] = k.imgUrl_1
+            total['imgUrl_2'] = k.imgUrl_2
 
-                total['match_id'] = values[j][-1]
+            total['objId_1'] = k.objId_1
+            total['objId_2'] = k.objId_2
+            total['match_id'] = k.match
 
-            total['Lat_center'] = total['Lat_center'] / c
-            total['Lon_center'] = total['Lon_center'] / c
+            total['classname'] = k.classname_1 # doesn't matter same classname_1 and classname_2
 
-            total['Lat_cornerA'] = total['Lat_cornerA'] / c
-            total['Lon_cornerA'] = total['Lon_cornerA'] / c
+            geojsonParams = {
+                "lat"           : float(k.intersectCenter['x']),
+                "lon"           : float(k.intersectCenter['y']),
+                "score_1"       : k.score_1,
+                "score_2"       : k.score_2,
+                "objId_1"       : k.objId_1,
+                "objId_2"       : k.objId_2,
+                "bbox_1"        : k.bbox_1,
+                "bbox_2"        : k.bbox_2,
+                "segmentation_1": k.segmentation_1,
+                "segmentation_2": k.segmentation_2,
+                "panoId_1"      : k.panoId_1,
+                "panoId_2"      : k.panoId_2,
+                "type"          : "Point",
+                "format"        : "paired"
+            }
 
-            total['Lat_cornerB'] = total['Lat_cornerB'] / c
-            total['Lon_cornerB'] = total['Lon_cornerB'] / c
+            mergedPoints.append(geoFunc(**geojsonParams))
+            confidence = self.apply_confidence_rule(i)
 
-            total['Lat_cornerC'] = total['Lat_cornerC'] / c
-            total['Lon_cornerC'] = total['Lon_cornerC'] / c
 
-            total['area'] = total['area'] / c
-            total['avg_score'] = (total['score'] / c)
-            total['point'] = (total['avg_score'] + confidence) * 0.5
-            total['isValid'] = c > 1
-            averagePoint_arr.append(total)
+            total['isValid'] = i > 0
 
-        return averagePoint_arr
+
+        for k, v in objects.items():
+            total[k] = float(sum(v) / len(v))
+
+        total['matchedPoints'] = mergedPoints
+        total['confidence'] = (total['avg_score'] + confidence) * 0.5
+
+        return total
 
     def intersection_points_find(self, **kwargs):
 
