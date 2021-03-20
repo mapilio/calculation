@@ -119,27 +119,27 @@ class Intersection:
 
         return result
 
-    def intersection_points_average(self, groupMatches, geoFunc):
+    def intersection_points_average(self, groupMatches):
         total = Dict({})
         total['isValid'] = False
-        mergedPoints = []
+        pointsMerged = {}
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
         for matches in groupMatches:
             i += 2
             k = Dict(matches)
-            objects['Lat_center'].append(float(k.intersectCenter['x']))
-            objects['Lon_center'].append(float(k.intersectCenter['y']))
+            objects['Lat_center'].append((k.intersectCenter['x']))
+            objects['Lon_center'].append((k.intersectCenter['y']))
 
-            objects['Lat_cornerA'].append(float(k.intersectCornerA['x']))
-            objects['Lon_cornerA'].append(float(k.intersectCornerA['y']))
+            objects['Lat_cornerA'].append((k.intersectCornerA['x']))
+            objects['Lon_cornerA'].append((k.intersectCornerA['y']))
 
-            objects['Lat_cornerB'].append(float(k.intersectCornerB['x']))
-            objects['Lon_cornerB'].append(float(k.intersectCornerB['y']))
+            objects['Lat_cornerB'].append((k.intersectCornerB['x']))
+            objects['Lon_cornerB'].append((k.intersectCornerB['y']))
 
-            objects['Lat_cornerC'].append(float(k.intersectCornerC['x']))
-            objects['Lon_cornerC'].append(float(k.intersectCornerC['y']))
+            objects['Lat_cornerC'].append((k.intersectCornerC['x']))
+            objects['Lon_cornerC'].append((k.intersectCornerC['y']))
 
             objects['avg_score'].append(float(k.score_1))
             objects['avg_score'].append(float(k.score_2))
@@ -173,20 +173,17 @@ class Intersection:
                 "format"        : "paired"
             }
 
-            mergedPoints.append(geoFunc(**geojsonParams))
+            pointsMerged[k.match] = geojsonParams
             confidence = self.apply_confidence_rule(i)
 
-
             total['isValid'] = i > 0
-
 
         for k, v in objects.items():
             total[k] = float(sum(v) / len(v))
 
-        total['matchedPoints'] = mergedPoints
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
 
-        return total
+        return total, pointsMerged
 
     def intersection_points_find(self, **kwargs):
 
@@ -199,7 +196,7 @@ class Intersection:
         theta2 = points.theta2
         type = points.type
 
-        if type == "center":
+        if type == "point":
             ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
                                               start_lat2, start_lon2, theta2])
 
