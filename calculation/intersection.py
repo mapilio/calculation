@@ -207,7 +207,7 @@ class Intersection:
         theta2 = points.theta2
         type = points.type
 
-        if type == "point":
+        if type == "intersect":
             ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
                                               start_lat2, start_lon2, theta2])
 
@@ -227,7 +227,7 @@ class Intersection:
                                                         line2EndX=ops2["lat"],
                                                         line2EndY=ops2["lon"])
             return interSection, destinationPoint1, destinationPoint2
-        if type == "corner":
+        if type == "area":
             interSectionPoints = []
             for first, second in zip(theta1, theta2):
                 ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, first,
