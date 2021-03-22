@@ -37,15 +37,19 @@ class Intersection:
             return a <= n and n <= b
         return a <= n or n <= b
 
-    def calc_between_heading_angle(self, n):
+    def calc_between_heading_angle(self, nArr):
         # n = heading
         # a = angle
         a = self.intersection_angle_wide
-        t = 360 + n
-        x = (-(a - t)) % 360
-        y = (a + t) % 360
-        # x, y hands of angle
-        return x, y
+        ret = []
+        for n in nArr:
+            t = 360 + n
+            x = (-(a - t)) % 360
+            y = (a + t) % 360
+            # x, y hands of angle
+            ret.append([x, y])
+
+        return [item for sublist in ret for item in sublist]
 
     def ops_detect(self, loc):
         """
