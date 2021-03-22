@@ -228,7 +228,7 @@ class Intersection:
                                                         line2EndY=ops2["lon"])
             return interSection, destinationPoint1, destinationPoint2
         if type == "area":
-            interSectionPoints = []
+            corners = []
             for first, second in zip(theta1, theta2):
                 ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, first,
                                                   start_lat2, start_lon2, second])
@@ -242,9 +242,9 @@ class Intersection:
                                                             line2StartY=start_lon2,
                                                             line2EndX=ops2["lat"],
                                                             line2EndY=ops2["lon"])
-                interSectionPoints.append(interSection)
+                corners.append(interSection)
 
-            return interSectionPoints
+            return corners
 
 
 def decimal_fix(number):
