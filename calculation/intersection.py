@@ -23,19 +23,26 @@ class Intersection:
         return confidence_rate
 
     @staticmethod
-    def angle_between(n, a, b):
-        ## n = chech between a and b parameter
-        ## a start point angle
-        ## b finish point angle
-        n = int(n)
-        a = int(a)
-        b = int(b)
-        n = (360 + (n % 360)) % 360
-        a = (3600000 + a) % 360
-        b = (3600000 + b) % 360
-        if a < b:
-            return a <= n and n <= b
-        return a <= n or n <= b
+    def angle_between(frameFilters):
+        rets = []
+        for params in frameFilters:
+            ## n = chech between a and b parameter
+            ## a start point angle
+            ## b finish point angle
+            n = int(params[0])
+            a = int(params[1])
+            b = int(params[2])
+            n = (360 + (n % 360)) % 360
+            a = (3600000 + a) % 360
+            b = (3600000 + b) % 360
+            if a < b:
+                result = a <= n <= b
+                rets.append(result)
+            else:
+                result = a <= n or n <= b
+                rets.append(result)
+
+        return rets
 
     def calc_between_heading_angle(self, nArr):
         # n = heading
