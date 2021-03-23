@@ -4,6 +4,25 @@ from decimal import Decimal, ROUND_DOWN, getcontext
 import collections
 
 
+def geojson_properties(k, type: str, format: str):
+    return {
+        "lat": float(k.intersectCenter['x']),
+        "lon": float(k.intersectCenter['y']),
+        "score_1": k.score_1,
+        "score_2": k.score_2,
+        "objId_1": k.objId_1,
+        "objId_2": k.objId_2,
+        "bbox_1": k.bbox_1,
+        "bbox_2": k.bbox_2,
+        "segmentation_1": k.segmentation_1,
+        "segmentation_2": k.segmentation_2,
+        "panoId_1": k.panoId_1,
+        "panoId_2": k.panoId_2,
+        "type": type,
+        "format": format
+    }
+
+
 class Intersection:
 
     def __init__(self, **kwargs):
@@ -56,7 +75,16 @@ class Intersection:
             # x, y hands of angle
             ret.append([x, y])
 
-        return [item for sublist in ret for item in sublist]
+        anglesArr = [item for sublist in ret for item in sublist]
+        assert len(anglesArr) >= 4, "Check your Thetas"
+        angles = Dict({
+            'max1Ahead': anglesArr[0],
+            'min1Ahead': anglesArr[1],
+            'max2Ahead': anglesArr[2],
+            'min2Ahead': anglesArr[3]
+        })
+        del anglesArr
+        return angles
 
     def ops_detect(self, loc):
         """
@@ -131,8 +159,9 @@ class Intersection:
         return result
 
     def intersection_points_average(self, groupMatches):
-        total = Dict({})
-        total['isValid'] = False
+        total = Dict({
+            'isValid' : False
+        })
         pointsMerged = {}
         objects = collections.defaultdict(list)
         i = 0
@@ -167,22 +196,7 @@ class Intersection:
 
             total['classname'] = k.classname_1 # doesn't matter same classname_1 and classname_2
 
-            geojsonParams = {
-                "lat"           : float(k.intersectCenter['x']),
-                "lon"           : float(k.intersectCenter['y']),
-                "score_1"       : k.score_1,
-                "score_2"       : k.score_2,
-                "objId_1"       : k.objId_1,
-                "objId_2"       : k.objId_2,
-                "bbox_1"        : k.bbox_1,
-                "bbox_2"        : k.bbox_2,
-                "segmentation_1": k.segmentation_1,
-                "segmentation_2": k.segmentation_2,
-                "panoId_1"      : k.panoId_1,
-                "panoId_2"      : k.panoId_2,
-                "type"          : "Point",
-                "format"        : "paired"
-            }
+            geojsonParams = geojson_properties(k, type="Point", format="paired")
 
             pointsMerged[k.match] = geojsonParams
             confidence = self.apply_confidence_rule(i)
@@ -193,53 +207,64 @@ class Intersection:
             total[k] = float(sum(v) / len(v))
 
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
+        del objects
 
         return total, pointsMerged
 
     def intersection_points_find(self, **kwargs):
+        """
 
+        Parameters
+        ----------
+        kwargs |
+                start_lat1
+                start_lon1,
+                theta1,
+                start_lat2
+                start_lon2
+                theta2,
+                type
+        Returns
+        -------
+
+        """
         points = Dict(kwargs)
-        start_lat1 = points.start_lat1
-        start_lon1 = points.start_lon1
-        theta1 = points.theta1
-        start_lat2 = points.start_lat2
-        start_lon2 = points.start_lon2
-        theta2 = points.theta2
-        type = points.type
 
-        if type == "intersect":
-            ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
-                                              start_lat2, start_lon2, theta2])
+        if points.type == "intersect":
+            ops1, ops2 = self.ops_detect(loc=[points.start_lat1, points.start_lon1, points.theta1,
+                                              points.start_lat2, points.start_lon2, points.theta2])
 
-            destinationPoint1 = [(start_lat1, start_lon1),
+            destinationPoint1 = [(points.start_lat1, points.start_lon1),
                                  (ops1["lat"], ops1["lon"])]
 
-            destinationPoint2 = [(start_lat2, start_lon2),
+            destinationPoint2 = [(points.start_lat2, points.start_lon2),
                                  (ops2["lat"], ops2["lon"])]
 
-            interSection = self.check_line_intersection(line1StartX=start_lat1,
-                                                        line1StartY=start_lon1,
+            interSection = self.check_line_intersection(line1StartX=points.start_lat1,
+                                                        line1StartY=points.start_lon1,
                                                         line1EndX=ops1["lat"],
                                                         line1EndY=ops1["lon"],
 
-                                                        line2StartX=start_lat2,
-                                                        line2StartY=start_lon2,
+                                                        line2StartX=points.start_lat2,
+                                                        line2StartY=points.start_lon2,
                                                         line2EndX=ops2["lat"],
                                                         line2EndY=ops2["lon"])
-            return interSection, destinationPoint1, destinationPoint2
-        if type == "area":
-            corners = []
-            for first, second in zip(theta1, theta2):
-                ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, first,
-                                                  start_lat2, start_lon2, second])
 
-                interSection = self.check_line_intersection(line1StartX=start_lat1,
-                                                            line1StartY=start_lon1,
+            return interSection, destinationPoint1, destinationPoint2
+
+        if points.type == "area":
+            corners = []
+            for first, second in zip(points.theta1, points.theta2):
+                ops1, ops2 = self.ops_detect(loc=[points.start_lat1, points.start_lon1, first,
+                                                  points.start_lat2, points.start_lon2, second])
+
+                interSection = self.check_line_intersection(line1StartX=points.start_lat1,
+                                                            line1StartY=points.start_lon1,
                                                             line1EndX=ops1["lat"],
                                                             line1EndY=ops1["lon"],
 
-                                                            line2StartX=start_lat2,
-                                                            line2StartY=start_lon2,
+                                                            line2StartX=points.start_lat2,
+                                                            line2StartY=points.start_lon2,
                                                             line2EndX=ops2["lat"],
                                                             line2EndY=ops2["lon"])
                 corners.append(interSection)
