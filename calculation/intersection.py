@@ -1,7 +1,26 @@
 from calculation.distance import Distance
-from calculation.pixel import Pixel
 from addict import Dict
 from decimal import Decimal, ROUND_DOWN, getcontext
+import collections
+
+
+def geojson_properties(k, type: str, format: str):
+    return {
+        "lat": float(k.intersectCenter['x']),
+        "lon": float(k.intersectCenter['y']),
+        "score_1": k.score_1,
+        "score_2": k.score_2,
+        "objId_1": k.objId_1,
+        "objId_2": k.objId_2,
+        "bbox_1": k.bbox_1,
+        "bbox_2": k.bbox_2,
+        "segmentation_1": k.segmentation_1,
+        "segmentation_2": k.segmentation_2,
+        "panoId_1": k.panoId_1,
+        "panoId_2": k.panoId_2,
+        "type": type,
+        "format": format
+    }
 
 
 class Intersection:
@@ -23,29 +42,49 @@ class Intersection:
         return confidence_rate
 
     @staticmethod
-    def angle_between(n, a, b):
-        ## n = chech between a and b parameter
-        ## a start point angle
-        ## b finish point angle
-        n = int(n)
-        a = int(a)
-        b = int(b)
-        n = (360 + (n % 360)) % 360
-        a = (3600000 + a) % 360
-        b = (3600000 + b) % 360
-        if a < b:
-            return a <= n and n <= b
-        return a <= n or n <= b
+    def angle_between(frameFilters):
+        rets = []
+        for params in frameFilters:
+            ## n = chech between a and b parameter
+            ## a start point angle
+            ## b finish point angle
+            n = int(params[0])
+            a = int(params[1])
+            b = int(params[2])
+            n = (360 + (n % 360)) % 360
+            a = (3600000 + a) % 360
+            b = (3600000 + b) % 360
+            if a < b:
+                result = a <= n <= b
+                rets.append(result)
+            else:
+                result = a <= n or n <= b
+                rets.append(result)
 
-    def calc_between_heading_angle(self, n):
+        return rets
+
+    def calc_between_heading_angle(self, nArr):
         # n = heading
         # a = angle
         a = self.intersection_angle_wide
-        t = 360 + n
-        x = (-(a - t)) % 360
-        y = (a + t) % 360
-        # x, y hands of angle
-        return x, y
+        ret = []
+        for n in nArr:
+            t = 360 + n
+            x = (-(a - t)) % 360
+            y = (a + t) % 360
+            # x, y hands of angle
+            ret.append([x, y])
+
+        anglesArr = [item for sublist in ret for item in sublist]
+        assert len(anglesArr) >= 4, "Check your Thetas"
+        angles = Dict({
+            'max1Ahead': anglesArr[0],
+            'min1Ahead': anglesArr[1],
+            'max2Ahead': anglesArr[2],
+            'min2Ahead': anglesArr[3]
+        })
+        del anglesArr
+        return angles
 
     def ops_detect(self, loc):
         """
@@ -119,113 +158,118 @@ class Intersection:
 
         return result
 
-    def intersection_points_average(self, averagePoint):
-        averagePoint_arr = []
-        for keys, values in averagePoint.items():
-            total = {'Lat_center': 0, 'Lon_center': 0,
-                     'Lat_cornerA': 0, 'Lon_cornerA': 0,
-                     'Lat_cornerB': 0, 'Lon_cornerB': 0,
-                     'Lat_cornerC': 0, 'Lon_cornerC': 0,
-                     'score': 0, 'isValid': 0,
-                     'avg_score': 0,
-                     'area': 0,
-                     'point': 0, 'match_id': 0, 'detectedObjectPath': None,
-                     'imgUrl': None}
-            c = len(values)
-            confidence = self.apply_confidence_rule(c)
+    def intersection_points_average(self, groupMatches):
+        total = Dict({
+            'isValid' : False
+        })
+        pointsMerged = {}
+        objects = collections.defaultdict(list)
+        i = 0
+        confidence = 0
+        for matches in groupMatches:
+            i += 2
+            k = Dict(matches)
+            objects['Lat_center'].append((k.intersectCenter['x']))
+            objects['Lon_center'].append((k.intersectCenter['y']))
 
-            # TODO refactor
-            for j in range(c):
-                total['classname'] = values[j][1]
-                total['score'] += values[j][2]
-                total['imgid'] = values[j][3]
+            objects['Lat_cornerA'].append((k.intersectCornerA['x']))
+            objects['Lon_cornerA'].append((k.intersectCornerA['y']))
 
-                total['Lat_center'] += float(values[j][4])
-                total['Lon_center'] += float(values[j][5])
+            objects['Lat_cornerB'].append((k.intersectCornerB['x']))
+            objects['Lon_cornerB'].append((k.intersectCornerB['y']))
 
-                total['Lat_cornerA'] += float(values[j][6])
-                total['Lon_cornerA'] += float(values[j][7])
+            objects['Lat_cornerC'].append((k.intersectCornerC['x']))
+            objects['Lon_cornerC'].append((k.intersectCornerC['y']))
 
-                total['Lat_cornerB'] += float(values[j][8])
-                total['Lon_cornerB'] += float(values[j][9])
+            objects['avg_score'].append(float(k.score_1))
+            objects['avg_score'].append(float(k.score_2))
 
-                total['Lat_cornerC'] += float(values[j][10])
-                total['Lon_cornerC'] += float(values[j][11])
+            total['detectedPath_1'] = k.detectedPath_1
+            total['detectedPath_2'] = k.detectedPath_2
 
-                total['detectedObjectPath'] = values[j][12]
-                total['imgUrl'] = values[j][13]
+            total['imgUrl_1'] = k.imgUrl_1
+            total['imgUrl_2'] = k.imgUrl_2
 
-                total['match_id'] = values[j][-1]
+            total['objId_1'] = k.objId_1
+            total['objId_2'] = k.objId_2
+            total['match_id'] = k.match
 
-            total['Lat_center'] = total['Lat_center'] / c
-            total['Lon_center'] = total['Lon_center'] / c
+            total['classname'] = k.classname_1 # doesn't matter same classname_1 and classname_2
 
-            total['Lat_cornerA'] = total['Lat_cornerA'] / c
-            total['Lon_cornerA'] = total['Lon_cornerA'] / c
+            geojsonParams = geojson_properties(k, type="Point", format="paired")
 
-            total['Lat_cornerB'] = total['Lat_cornerB'] / c
-            total['Lon_cornerB'] = total['Lon_cornerB'] / c
+            pointsMerged[k.match] = geojsonParams
+            confidence = self.apply_confidence_rule(i)
 
-            total['Lat_cornerC'] = total['Lat_cornerC'] / c
-            total['Lon_cornerC'] = total['Lon_cornerC'] / c
+            total['isValid'] = i > 0
 
-            total['area'] = total['area'] / c
-            total['avg_score'] = (total['score'] / c)
-            total['point'] = (total['avg_score'] + confidence) * 0.5
-            total['isValid'] = c > 1
-            averagePoint_arr.append(total)
+        for k, v in objects.items():
+            total[k] = float(sum(v) / len(v))
 
-        return averagePoint_arr
+        total['confidence'] = (total['avg_score'] + confidence) * 0.5
+        del objects
+
+        return total, pointsMerged
 
     def intersection_points_find(self, **kwargs):
+        """
 
+        Parameters
+        ----------
+        kwargs |
+                start_lat1
+                start_lon1,
+                theta1,
+                start_lat2
+                start_lon2
+                theta2,
+                type
+        Returns
+        -------
+
+        """
         points = Dict(kwargs)
-        start_lat1 = points.start_lat1
-        start_lon1 = points.start_lon1
-        theta1 = points.theta1
-        start_lat2 = points.start_lat2
-        start_lon2 = points.start_lon2
-        theta2 = points.theta2
-        type = points.type
 
-        if type == "center":
-            ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, theta1,
-                                              start_lat2, start_lon2, theta2])
+        if points.type == "intersect":
+            ops1, ops2 = self.ops_detect(loc=[points.start_lat1, points.start_lon1, points.theta1,
+                                              points.start_lat2, points.start_lon2, points.theta2])
 
-            destinationPoint1 = [(start_lat1, start_lon1),
+            destinationPoint1 = [(points.start_lat1, points.start_lon1),
                                  (ops1["lat"], ops1["lon"])]
 
-            destinationPoint2 = [(start_lat2, start_lon2),
+            destinationPoint2 = [(points.start_lat2, points.start_lon2),
                                  (ops2["lat"], ops2["lon"])]
 
-            interSection = self.check_line_intersection(line1StartX=start_lat1,
-                                                        line1StartY=start_lon1,
+            interSection = self.check_line_intersection(line1StartX=points.start_lat1,
+                                                        line1StartY=points.start_lon1,
                                                         line1EndX=ops1["lat"],
                                                         line1EndY=ops1["lon"],
 
-                                                        line2StartX=start_lat2,
-                                                        line2StartY=start_lon2,
+                                                        line2StartX=points.start_lat2,
+                                                        line2StartY=points.start_lon2,
                                                         line2EndX=ops2["lat"],
                                                         line2EndY=ops2["lon"])
-            return interSection, destinationPoint1, destinationPoint2
-        if type == "corner":
-            interSectionPoints = []
-            for first, second in zip(theta1, theta2):
-                ops1, ops2 = self.ops_detect(loc=[start_lat1, start_lon1, first,
-                                                  start_lat2, start_lon2, second])
 
-                interSection = self.check_line_intersection(line1StartX=start_lat1,
-                                                            line1StartY=start_lon1,
+            return interSection, destinationPoint1, destinationPoint2
+
+        if points.type == "area":
+            corners = []
+            for first, second in zip(points.theta1, points.theta2):
+                ops1, ops2 = self.ops_detect(loc=[points.start_lat1, points.start_lon1, first,
+                                                  points.start_lat2, points.start_lon2, second])
+
+                interSection = self.check_line_intersection(line1StartX=points.start_lat1,
+                                                            line1StartY=points.start_lon1,
                                                             line1EndX=ops1["lat"],
                                                             line1EndY=ops1["lon"],
 
-                                                            line2StartX=start_lat2,
-                                                            line2StartY=start_lon2,
+                                                            line2StartX=points.start_lat2,
+                                                            line2StartY=points.start_lon2,
                                                             line2EndX=ops2["lat"],
                                                             line2EndY=ops2["lon"])
-                interSectionPoints.append(interSection)
+                corners.append(interSection)
 
-            return interSectionPoints
+            return corners
 
 
 def decimal_fix(number):
