@@ -180,6 +180,7 @@ class Intersection:
 
             total['classname'] = k.classname_1 # doesn't matter same classname_1 and classname_2
 
+            # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(k, type="Point", format="paired")
 
             pointsMerged[k.match] = geojsonParams
