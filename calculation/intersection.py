@@ -146,7 +146,7 @@ class Intersection:
         total = Dict({
             'isValid' : False
         })
-        pointsMerged = {}
+        pointsMerged = []
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
@@ -183,7 +183,7 @@ class Intersection:
             # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(k, type="Point", format="paired")
 
-            pointsMerged[k.match] = geojsonParams
+            pointsMerged.append(geojsonParams)
             confidence = self.apply_confidence_rule(i)
 
             total['isValid'] = i > 0
