@@ -4,23 +4,7 @@ from decimal import Decimal, ROUND_DOWN, getcontext
 import collections
 
 
-def geojson_properties(k, type: str, format: str):
-    return {
-        "lat": float(k.intersectCenter['x']),
-        "lon": float(k.intersectCenter['y']),
-        "score_1": k.score_1,
-        "score_2": k.score_2,
-        "objId_1": k.objId_1,
-        "objId_2": k.objId_2,
-        "bbox_1": k.bbox_1,
-        "bbox_2": k.bbox_2,
-        "segmentation_1": k.segmentation_1,
-        "segmentation_2": k.segmentation_2,
-        "panoId_1": k.panoId_1,
-        "panoId_2": k.panoId_2,
-        "type": type,
-        "format": format
-    }
+
 
 
 class Intersection:
@@ -158,11 +142,11 @@ class Intersection:
 
         return result
 
-    def intersection_points_average(self, groupMatches):
+    def intersection_points_average(self, groupMatches, geojsonFormatFunc):
         total = Dict({
             'isValid' : False
         })
-        pointsMerged = {}
+        pointsMerged = []
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
@@ -196,9 +180,10 @@ class Intersection:
 
             total['classname'] = k.classname_1 # doesn't matter same classname_1 and classname_2
 
-            geojsonParams = geojson_properties(k, type="Point", format="paired")
+            # creating geo json format according to paired points
+            geojsonParams = geojsonFormatFunc(k, type="Point")
 
-            pointsMerged[k.match] = geojsonParams
+            pointsMerged.append(geojsonParams)
             confidence = self.apply_confidence_rule(i)
 
             total['isValid'] = i > 0
