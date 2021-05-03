@@ -1,18 +1,21 @@
+from typing import Callable, Tuple
+
 from calculation.distance import Distance
+from helper.convertor import Convertor
+
 from addict import Dict
-from decimal import Decimal, ROUND_DOWN, getcontext
 import collections
-
-
-
 
 
 class Intersection:
 
     def __init__(self, **kwargs):
         """
-        intersection_lineLength=self.config.intersection.lineLength,
-        angle_wide=self.config.intersection.angle_wide
+
+        Args:
+            **kwargs:
+            -> intersection_lineLength=self.config.intersection.lineLength,
+            -> angle_wide=self.config.intersection.angle_wide
         """
         self.__dict__.update(kwargs)
 
@@ -21,12 +24,28 @@ class Intersection:
 
     @staticmethod
     def apply_confidence_rule(c):
+        """
+
+        Args:
+            c: detected car location
+
+        Returns:
+            it's score for how many has captured car locations and calculate 0 < result < 100
+        """
         confidence_rate = (1 - 1 / c) if c else "{} can't null".format({c})
 
         return confidence_rate
 
     @staticmethod
-    def angle_between(frameFilters):
+    def angle_between(frameFilters: list) -> list:
+        """
+            calculated theta is it between define angle hands
+        Args:
+            # TODO car1 and car2 [ theta1, theta2, angleMIN, angleMAX]
+            frameFilters:  car1 = [theta1, angleMIN, angleMAX], car2 = [theta1, angleMIN, angleMAX]
+        Returns:
+            only two position cars calculate and return such as [True, False],  [False, False]
+        """
         rets = []
         for params in frameFilters:
             ## n = chech between a and b parameter
@@ -47,9 +66,20 @@ class Intersection:
 
         return rets
 
-    def calc_between_heading_angle(self, nArr):
-        # n = heading
-        # a = angle
+    def calc_between_heading_angle(self, nArr: list) -> Dict:
+        """
+         angle with heading relations check for intersection angle wide
+         Example1 :
+            angle  = 120 and heading = 75  result {theta must be between max 195 min 45}
+         Example2 :
+            angle  = 50 and heading = 320  result {theta must be between max 270 min 30}
+        Args:
+            nArr: its list and include headings
+
+        Returns:
+            up limit and down limit for theta degrees.
+        """
+
         a = self.intersection_angle_wide
         ret = []
         for n in nArr:
@@ -75,6 +105,11 @@ class Intersection:
         location location of points
         intersection_lineLength: on the other hand, allows it to change automatically
         when we change it from the config file to specify the line length here.
+        Args:
+            loc: calculated coordinates
+
+        Returns:
+
         """
         ops = []
         for i in range(0, len(loc), 3):
@@ -83,7 +118,25 @@ class Intersection:
 
         return ops[0], ops[1]
 
-    def check_line_intersection(self, **kwargs):
+    @staticmethod
+    def check_line_intersection(**kwargs) -> Dict:
+        """
+        Calculate from two points intersected locations
+
+        Args:
+            **kwargs:
+            -> line1StartX
+            -> line1StartY
+            -> line1EndX
+            -> line1EndY
+            -> line2StartX
+            -> line2StartY
+            -> line2EndX
+            -> line2EndY
+
+        Returns:
+
+        """
 
         points = Dict(kwargs)
         line1StartX = points.line1StartX
@@ -107,18 +160,16 @@ class Intersection:
         # and the one from the database can be decimal.
         if isinstance(line1StartX, float):
             line1StartX, line1StartY, \
-            line2StartX, line2StartY = intersection_float_to_decimal(line1StartX,
-                                                                     line1StartY,
+            line2StartX, line2StartY = intersection_float_to_decimal(line1StartX, line1StartY,
                                                                      line2StartX, line2StartY)
         if isinstance(line1EndX, float):
             line1EndX, line1EndY, \
-            line2EndX, line2EndY = intersection_float_to_decimal(line1EndX,
-                                                                 line1EndY,
-                                                                 line2EndX,
-                                                                 line2EndY)
+            line2EndX, line2EndY = intersection_float_to_decimal(line1EndX, line1EndY,
+                                                                 line2EndX, line2EndY)
 
-        denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - (
-                (line2EndX - line2StartX) * (line1EndY - line1StartY))
+        posit1 = ((line2EndY - line2StartY) * (line1EndX - line1StartX))
+        posit2 = ((line2EndX - line2StartX) * (line1EndY - line1StartY))
+        denominator = posit1 - posit2
 
         if denominator == 0:
             return result
@@ -142,9 +193,18 @@ class Intersection:
 
         return result
 
-    def intersection_points_average(self, groupMatches, geojsonFormatFunc):
+    def intersection_points_average(self, groupMatches: list, geojsonFormatFunc: Callable) -> Tuple[Dict, list]:
+        """
+
+        Args:
+            groupMatches: matched objects same class, same points
+            geojsonFormatFunc: it's function for creating geojson format
+
+        Returns:
+            It calculates a single point by taking the averages of all the detected intersections.
+        """
         total = Dict({
-            'isValid' : False
+            'isValid': False
         })
         pointsMerged = []
         objects = collections.defaultdict(list)
@@ -178,7 +238,7 @@ class Intersection:
             total['objId_2'] = k.objId_2
             total['match_id'] = k.match
 
-            total['classname'] = k.classname_1 # doesn't matter same classname_1 and classname_2
+            total['classname'] = k.classname_1  # doesn't matter same classname_1 and classname_2
 
             # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(k, type="Point")
@@ -198,20 +258,19 @@ class Intersection:
 
     def intersection_points_find(self, **kwargs):
         """
+        from two points calculate intersection
+        Args:
+            **kwargs:
+            -> start_lat1
+            -> start_lon1
+            -> theta1
+            -> start_lat2
+            -> start_lon2
+            -> theta2
+            -> type : intersect or area
 
-        Parameters
-        ----------
-        kwargs |
-                start_lat1
-                start_lon1,
-                theta1,
-                start_lat2
-                start_lon2
-                theta2,
-                type
-        Returns
-        -------
-
+        Returns:
+            get coordinates
         """
         points = Dict(kwargs)
 
@@ -257,28 +316,27 @@ class Intersection:
             return corners
 
 
-def decimal_fix(number):
+def decimal_fix(number: float) -> Decimal:
     getcontext().rounding = ROUND_DOWN
     return Decimal(number).quantize(Decimal(10) ** -9)
 
 
-def intersection_float_to_decimal(lat1, lon1, lat2, lon2):
+def intersection_float_to_decimal(lat1, lon1, lat2, lon2) -> Tuple:
     """
 
-    Parameters
-    ----------
-    lat1
-    lon1
-    lat2
-    lon2
+    Args:
+        lat1:
+        lon1:
+        lat2:
+        lon2:
 
-    Returns points convert decimal format
-    -------
-
+    Returns:
+        points convert decimal format
     """
-    lat1 = decimal_fix(lat1)
-    lon1 = decimal_fix(lon1)
-    lat2 = decimal_fix(lat2)
-    lon2 = decimal_fix(lon2)
+
+    lat1 = Convertor.decimal_fix(lat1)
+    lon1 = Convertor.decimal_fix(lon1)
+    lat2 = Convertor.decimal_fix(lat2)
+    lon2 = Convertor.decimal_fix(lon2)
 
     return lat1, lon1, lat2, lon2
