@@ -316,10 +316,6 @@ class Intersection:
             return corners
 
 
-def decimal_fix(number: float) -> Decimal:
-    getcontext().rounding = ROUND_DOWN
-    return Decimal(number).quantize(Decimal(10) ** -9)
-
 
 def intersection_float_to_decimal(lat1, lon1, lat2, lon2) -> Tuple:
     """
