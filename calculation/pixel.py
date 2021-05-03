@@ -8,6 +8,22 @@ class Pixel:
 
     @staticmethod
     def calc_origin(y0, x0, box, height=0, width=0, horizon=0, lefBegin=0, rightBegin=0):
+        """
+            basically it does the process of converting prediction from pictures taken as tile to
+            pixel coordinates on panoramic images.
+        Args:
+            y0: tiled panoramic image column number
+            x0: tiled panoramic image row number
+            box: tiled image detected object bounding box
+            height:
+            width:
+            horizon:
+            lefBegin:
+            rightBegin:
+
+        Returns:
+
+        """
         if len(box) == 4:
             ymin = horizon + y0 + int(round(box[1] * height))
             xmin = x0 + int(round(box[0] * width + lefBegin))

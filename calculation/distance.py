@@ -15,17 +15,13 @@ class Distance:
     @staticmethod
     def checkValidity(a: float, b: float, c: float) -> bool:
         """
-        Triangle rule checks
-        it's triangle edged as a, b, c
-        Parameters
-        ----------
-        a
-        b
-        c
-
-        Returns if is not triangle and C degree over the defined variable return False.
-        -------
-
+        Triangle rule checks it's triangle edged as a, b, c
+        Args:
+            a: edge
+            b: edge
+            c: edge
+        Returns:
+            if is not triangle and C degree over the defined variable return False.
         """
         a, b, c, A, B, C = solve(a, b, c)
         if (a + b <= c) or (a + c <= b) or (b + c <= a):
@@ -37,6 +33,17 @@ class Distance:
     def bearing(**kwargs):
         """
         Calculate bearing(direction) from two points
+        Args:
+            **kwargs:
+             -> startLat
+             -> startLon
+             -> destLat
+             -> destLon
+        Returns:
+            Angle calculate from two point
+        """
+        """
+        
 
         :param startLat:
         :param startLon:
@@ -65,12 +72,15 @@ class Distance:
         """
         Calculate the great circle distance between two points
         on the earth (specified in decimal degrees)
+        Args:
+            **kwargs:
+            -> lon1
+            -> lat1
+            -> lon2
+            -> lat2
 
-        :param lon1:
-        :param lat1:
-        :param lon2:
-        :param lat2:
-        :return:
+        Returns:
+            distance between two points
         """
         points = Dict(kwargs)
         lon1 = points.lon1
@@ -110,20 +120,15 @@ class Distance:
 
     def check_triangle_rule(self, cornerA, cornerB, cornerC) -> bool:
         """
-        triangle rule
-        abs(edgeA - edgeB) < edgeC < edgeA + edgeB
+            abs(edgeA - edgeB) < edgeC < edgeA + edgeB
+        Args:
+            cornerA: edge
+            cornerB: edge
+            cornerC: edge
 
-        Parameters
-        ----------
-        cornerA
-        cornerB
-        cornerC
-
-        Returns true or false
-        -------
-
+        Returns:
+            true or false
         """
-
         edgeAB = (self.haversine(lon1=cornerA[0], lat1=cornerA[1],
                                  lon2=cornerB[0], lat2=cornerB[1])) * 1000
         edgeAC = (self.haversine(lon1=cornerA[0], lat1=cornerA[1],
@@ -135,6 +140,15 @@ class Distance:
 
     @staticmethod
     def check_bbox_distance(box, cfg):
+        """
+        it's check bbox size from taken config params
+        Args:
+            box: detected objects bounding box
+            cfg: criterion such as bboxHeight, bboxWidth
+
+        Returns:
+
+        """
         xmin, ymin, xmax, ymax = list(map(int, box))
         # print("Y Distances = ",np.abs(ymax-ymin),
         #       "X Distances = ", np.abs(xmax-xmin))
@@ -158,15 +172,14 @@ class Distance:
         The formulae used is the following:
             θ = atan2(sin(Δlong).cos(lat2),
                       cos(lat1).sin(lat2) − sin(lat1).cos(lat2).cos(Δlong))
-        :Parameters:
-          - `pointA: The tuple representing the latitude/longitude for the
-            first point. Latitude and longitude must be in decimal degrees
-          - `pointB: The tuple representing the latitude/longitude for the
-            second point. Latitude and longitude must be in decimal degrees
-        :Returns:
-          The bearing in degrees
-        :Returns Type:
-          float
+        Args:
+            pointA: The tuple representing the latitude/longitude for the
+                    first point. Latitude and longitude must be in decimal degrees
+            pointB: The tuple representing the latitude/longitude for the
+                    second point. Latitude and longitude must be in decimal degrees
+
+        Returns:
+            Angle calculate from two point
         """
         if (type(pointA) != tuple) or (type(pointB) != tuple):
             raise TypeError("Only tuples are supported as arguments")
