@@ -5,9 +5,11 @@ from helper.exif_read import ExifRead
 from helper.generator import Generator
 
 
-class ExifExtract:
+class ExifExtractHeading:
+    # TODO pointA and pointB operations will be move `helper-mapilio`
+    # TODO and these variables will send heading calc function.
     @staticmethod
-    def exif_extractor(img_urls):
+    def heading_calc(img_urls: list) -> dict:
         processing_format = {}
         objects_zone = []
         for key, x in enumerate(range(0, len(img_urls) - 1, 1)):
