@@ -23,7 +23,8 @@ INSTALL_REQUIRES = [
     'numpy',
     'solve',
     'trianglesolver',
-    'geopy'
+    'geopy',
+    'helper-mapilio'
 ]
 
 setup(
