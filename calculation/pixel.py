@@ -87,3 +87,36 @@ class Pixel:
             return True
         else:
             return False
+
+    @staticmethod
+    def get_angle_pca(detectedObject: np.ndarray) -> float:
+        # extract the PCA from segmentation object
+
+        img_gray = cv2.cvtColor(detectedObject, cv2.IMREAD_GRAYSCALE)  # convert to grayscale
+        # _, thresh = cv2.threshold(img_gray, 255, 1, cv2.THRESH_BINARY_INV)
+        imag_arr = np.array(img_gray)
+        mat = np.argwhere(imag_arr == 255)
+        mat[:, [0, 1]] = mat[:, [1, 0]]
+        mat = np.array(mat).astype(np.float32)  # have to convert type for PCA
+        m, e = cv2.PCACompute(mat, mean=np.array([]))
+
+        center = tuple(m[0])
+        center = (int(center[0]), int(center[1]))
+
+        # endpoint1 = tuple(m[0] + e[0] * 100)
+        # endpoint1 = (int(endpoint1[0]), int(endpoint1[1]))
+
+        endpoint2 = tuple(m[0] + e[1] * 50)
+        endpoint2 = (int(endpoint2[0]), int(endpoint2[1]))
+
+        x = center
+        y = (center[0], center[1] + 50)
+        z = endpoint2
+
+        b = distance.euclidean(x, y)
+        c = distance.euclidean(x, z)
+        a = distance.euclidean(y, z)
+        cos_alpha = (b * b + c * c - a * a) / (2 * b * c)
+        pca_angle = float(np.degrees(np.arccos(cos_alpha)))
+
+        return pca_angle
