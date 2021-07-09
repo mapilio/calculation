@@ -208,6 +208,8 @@ class Intersection:
             'isValid': False
         })
         pointsMerged = []
+        mathed_object_id = []
+        matched_paired = []
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
@@ -261,7 +263,7 @@ class Intersection:
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
         del objects
 
-        return total, pointsMerged
+        return total, pointsMerged, mathed_object_id, matched_paired
 
     def intersection_points_find(self, **kwargs):
         """

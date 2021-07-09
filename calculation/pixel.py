@@ -1,7 +1,9 @@
 """
 Refers as pixCalc
 """
-import numpy
+import numpy as np
+import cv2
+from scipy.spatial import distance
 
 
 class Pixel:
@@ -42,8 +44,8 @@ class Pixel:
                         segmentation.append([x0 + int(round(box[index] * width + lefBegin)),
                                              horizon + y0 + int(round(box[index + 1] * height))
                                              ])
-                    contours = [numpy.array(segmentation
-                                            , dtype=numpy.int32)]
+                    contours = [np.array(segmentation
+                                         , dtype=np.int32)]
                 except:
                     raise ValueError("Check out box size")
 
