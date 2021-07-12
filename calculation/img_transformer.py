@@ -15,13 +15,13 @@ class ImageTransformer(object):
 
     """ Wrapper of Rotating a Image """
 
-    def rotate_along_axis(self, roll, pitch, yaw=0, dx=0, dy=0, dz=1):
+    def rotate_along_axis(self, pitch,roll=0, yaw=0, dx=0, dy=0, dz=1):
         # Get radius of rotation along 3 axes
         # roll : x-axis
         # pitch : y-axis
         # yaw : z-axis
         cc = Convertor()
-        rroll, rpitch, ryaw = cc.get_rad(roll, pitch, yaw=0)
+        rpitch, rroll, ryaw = cc.get_rad(pitch, roll, yaw=0)
 
         # Get ideal focal length on z axis
         # NOTE: Change this section to other axis if needed
