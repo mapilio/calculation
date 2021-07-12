@@ -24,7 +24,7 @@ INSTALL_REQUIRES = [
     'solve',
     'trianglesolver',
     'geopy',
-    'helper-mapilio'
+    'helper-mapilio',
     'scipy'
 ]
 
