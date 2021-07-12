@@ -1,7 +1,9 @@
 """
 Refers as pixCalc
 """
-import numpy
+import numpy as np
+import cv2
+from scipy.spatial import distance
 
 
 class Pixel:
@@ -42,8 +44,8 @@ class Pixel:
                         segmentation.append([x0 + int(round(box[index] * width + lefBegin)),
                                              horizon + y0 + int(round(box[index + 1] * height))
                                              ])
-                    contours = [numpy.array(segmentation
-                                            , dtype=numpy.int32)]
+                    contours = [np.array(segmentation
+                                         , dtype=np.int32)]
                 except:
                     raise ValueError("Check out box size")
 
@@ -87,3 +89,58 @@ class Pixel:
             return True
         else:
             return False
+
+    @staticmethod
+    def get_angle_pca(detectedObject: np.ndarray) -> float:
+        # extract the PCA from segmentation object
+
+        img_gray = cv2.cvtColor(detectedObject, cv2.IMREAD_GRAYSCALE)  # convert to grayscale
+        # _, thresh = cv2.threshold(img_gray, 255, 1, cv2.THRESH_BINARY_INV)
+        imag_arr = np.array(img_gray)
+        mat = np.argwhere(imag_arr == 255)
+        mat[:, [0, 1]] = mat[:, [1, 0]]
+        mat = np.array(mat).astype(np.float32)  # have to convert type for PCA
+        m, e = cv2.PCACompute(mat, mean=np.array([]))
+
+        center = tuple(m[0])
+        center = (int(center[0]), int(center[1]))
+
+        # endpoint1 = tuple(m[0] + e[0] * 100)
+        # endpoint1 = (int(endpoint1[0]), int(endpoint1[1]))
+
+        endpoint2 = tuple(m[0] + e[1] * 50)
+        endpoint2 = (int(endpoint2[0]), int(endpoint2[1]))
+
+        x = center
+        y = (center[0], center[1] + 50)
+        z = endpoint2
+
+        b = distance.euclidean(x, y)
+        c = distance.euclidean(x, z)
+        a = distance.euclidean(y, z)
+        cos_alpha = (b * b + c * c - a * a) / (2 * b * c)
+        pca_angle = float(np.degrees(np.arccos(cos_alpha)))
+
+        return pca_angle
+
+    @staticmethod
+    def calc_image_scale_limiter(detect_bbox1: list, detect_bbox2: list) -> bool:
+        """
+        This function check bbox scale ratio between two bbox
+        """
+        # print(f"First Bbox = {detect_bbox1}")
+        # print(f"Second Bbox = {detect_bbox2}")
+
+        first_w, first_h = detect_bbox1[2] - detect_bbox1[0], detect_bbox1[3] - detect_bbox1[1]
+        second_w, second_h = detect_bbox2[2] - detect_bbox2[0], detect_bbox2[3] - detect_bbox2[1]
+
+        if any(x < 0 for x in [first_w, first_h, second_w, second_h]):
+            raise Exception("Check detected Bbox ")
+
+        # half_scale_w, half_scale_h = first_w * 0.75, first_h * 0.75
+        # double_scale_w, double_scale_h = first_w * 2.0, first_h * 2.0
+        w_rate = first_w / second_w if first_w > second_w else second_w / first_w
+        h_rate = first_h / second_h if first_h > second_h else second_h / first_h
+
+        # eğer bbox width'i büyümüş ise height büyümesi beklenir ve bunlar maximum 2 katı oranında
+        return True if 1 <= w_rate <= 2 and 1 <= h_rate <= 2 else False

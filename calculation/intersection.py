@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Callable, Tuple, List
 
 from calculation.distance import Distance
 from helper.convertor import Convertor
@@ -193,7 +193,8 @@ class Intersection:
 
         return result
 
-    def intersection_points_average(self, groupMatches: list, geojsonFormatFunc: Callable) -> Tuple[Dict, list]:
+    def intersection_points_average(self, groupMatches: list, geojsonFormatFunc: Callable) -> Tuple[
+        Dict, list, list, List[list]]:
         """
 
         Args:
@@ -207,6 +208,8 @@ class Intersection:
             'isValid': False
         })
         pointsMerged = []
+        mathed_object_id = []
+        matched_paired = []
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
@@ -248,13 +251,19 @@ class Intersection:
 
             total['isValid'] = i > 0
 
+            # added because of visualization matched paired objects
+            mathed_object_id.append(k.objId_1)
+            mathed_object_id.append(k.objId_2)
+            matched_paired.append([k.intersectCenter['x'],
+                                   k.intersectCenter['y']])
+
         for k, v in objects.items():
             total[k] = float(sum(v) / len(v))
 
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
         del objects
 
-        return total, pointsMerged
+        return total, pointsMerged, mathed_object_id, matched_paired
 
     def intersection_points_find(self, **kwargs):
         """
