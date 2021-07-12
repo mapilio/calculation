@@ -21,7 +21,7 @@ class ImageTransformer(object):
         # pitch : y-axis
         # yaw : z-axis
         cc = Convertor()
-        rpitch, rroll, ryaw = cc.get_rad(pitch, roll=roll, yaw=0)
+        rpitch, rroll, ryaw = cc.get_rad(pitch, roll, yaw=0)
 
         # Get ideal focal length on z axis
         # NOTE: Change this section to other axis if needed

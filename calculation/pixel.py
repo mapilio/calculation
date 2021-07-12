@@ -122,3 +122,31 @@ class Pixel:
         pca_angle = float(np.degrees(np.arccos(cos_alpha)))
 
         return pca_angle
+
+    @staticmethod
+    def calc_image_scale_limiter(detect_bbox1: list, detect_bbox2: list) -> bool:
+        """
+        This function check bbox scale ratio between two bbox
+        """
+        # print(f"First Bbox = {detect_bbox1}")
+        # print(f"Second Bbox = {detect_bbox2}")
+
+        first_w, first_h = detect_bbox1[2] - detect_bbox1[0], detect_bbox1[3] - detect_bbox1[1]
+        second_w, second_h = detect_bbox2[2] - detect_bbox2[0], detect_bbox2[3] - detect_bbox2[1]
+
+        if any(x < 0 for x in [first_w, first_h, second_w, second_h]):
+            raise Exception("Check detected Bbox ")
+
+        # half_scale_w, half_scale_h = first_w * 0.75, first_h * 0.75
+        # double_scale_w, double_scale_h = first_w * 2.0, first_h * 2.0
+        h_rate = first_h / second_h
+        w_rate = first_w / second_w
+
+        # (1 <= w_rate <= 2 and 1 <= h_rate <= 2) or ((0.5 <= w_rate <= 1 and 0.5 <= h_rate <= 1))
+        # eğer bbox width'i büyümüş ise height büyümesi beklenir ve bunlar maximum 2 katı oranında
+        # eğer ki width küçülmüş is height'inde küçülmesi beklenir ve bunlar maximum 0.5 katı oranında
+        if ((1 > w_rate or w_rate > 2) or (1 > h_rate or h_rate > 2)) and (
+                (0.5 > w_rate or w_rate > 1) or (0.5 > h_rate or h_rate > 1)):
+            return False
+        else:
+            return True
