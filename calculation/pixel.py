@@ -139,14 +139,8 @@ class Pixel:
 
         # half_scale_w, half_scale_h = first_w * 0.75, first_h * 0.75
         # double_scale_w, double_scale_h = first_w * 2.0, first_h * 2.0
-        h_rate = first_h / second_h
-        w_rate = first_w / second_w
+        w_rate = first_w / second_w if first_w > second_w else second_w / first_w
+        h_rate = first_h / second_h if first_h > second_h else second_h / first_h
 
-        # (1 <= w_rate <= 2 and 1 <= h_rate <= 2) or ((0.5 <= w_rate <= 1 and 0.5 <= h_rate <= 1))
         # eğer bbox width'i büyümüş ise height büyümesi beklenir ve bunlar maximum 2 katı oranında
-        # eğer ki width küçülmüş is height'inde küçülmesi beklenir ve bunlar maximum 0.5 katı oranında
-        if ((1 > w_rate or w_rate > 2) or (1 > h_rate or h_rate > 2)) and (
-                (0.5 > w_rate or w_rate > 1) or (0.5 > h_rate or h_rate > 1)):
-            return False
-        else:
-            return True
+        return True if 1 <= w_rate <= 2 and 1 <= h_rate <= 2 else False
