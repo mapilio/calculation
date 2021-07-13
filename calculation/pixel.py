@@ -144,3 +144,23 @@ class Pixel:
 
         # eğer bbox width'i büyümüş ise height büyümesi beklenir ve bunlar maximum 2 katı oranında
         return True if 1 <= w_rate <= 2 and 1 <= h_rate <= 2 else False
+
+    @staticmethod
+    def check_bbox_size(box, cfg):
+        """
+        it's check bbox size from taken config params
+        Args:
+            box: detected objects bounding box
+            cfg: criterion such as bboxHeight, bboxWidth
+
+        Returns:
+
+        """
+        xmin, ymin, xmax, ymax = list(map(int, box))
+        # print("Y Distances = ",np.abs(ymax-ymin),
+        #       "X Distances = ", np.abs(xmax-xmin))
+        if np.abs(ymax - ymin) < cfg.boundingBoxMinHeight \
+                or np.abs(
+            xmax - xmin) < cfg.boundingBoxMinWidth:  # these variables limited detected box in panoramic that only get this section.
+            return False
+        return True

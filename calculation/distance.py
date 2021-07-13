@@ -138,25 +138,7 @@ class Distance:
 
         return self.checkValidity(edgeAB, edgeAC, edgeBC)
 
-    @staticmethod
-    def check_bbox_distance(box, cfg):
-        """
-        it's check bbox size from taken config params
-        Args:
-            box: detected objects bounding box
-            cfg: criterion such as bboxHeight, bboxWidth
 
-        Returns:
-
-        """
-        xmin, ymin, xmax, ymax = list(map(int, box))
-        # print("Y Distances = ",np.abs(ymax-ymin),
-        #       "X Distances = ", np.abs(xmax-xmin))
-        if numpy.abs(ymax - ymin) < cfg.boundingBoxMinHeight \
-                or numpy.abs(
-            xmax - xmin) < cfg.boundingBoxMinWidth:  # these variables limited detected box in panoramic that only get this section.
-            return False
-        return True
 
     @staticmethod
     def line_to_XYs(line):
