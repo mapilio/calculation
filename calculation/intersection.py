@@ -207,44 +207,43 @@ class Intersection:
         total = Dict({
             'isValid': False
         })
-        pointsMerged = []
-        mathed_object_id = []
-        matched_paired = []
+        pointsMerged, matched_object_id, matched_paired, matched_paired = [], [], [], []
+
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
         for matches in groupMatches:
             i += 2
-            k = Dict(matches)
-            objects['Lat_center'].append((k.intersectCenter['x']))
-            objects['Lon_center'].append((k.intersectCenter['y']))
+            matches = Dict(matches)
+            objects['Lat_center'].append((matches.intersectCenter['x']))
+            objects['Lon_center'].append((matches.intersectCenter['y']))
 
-            objects['Lat_cornerA'].append((k.intersectCornerA['x']))
-            objects['Lon_cornerA'].append((k.intersectCornerA['y']))
+            objects['Lat_cornerA'].append((matches.intersectCornerA['x']))
+            objects['Lon_cornerA'].append((matches.intersectCornerA['y']))
 
-            objects['Lat_cornerB'].append((k.intersectCornerB['x']))
-            objects['Lon_cornerB'].append((k.intersectCornerB['y']))
+            objects['Lat_cornerB'].append((matches.intersectCornerB['x']))
+            objects['Lon_cornerB'].append((matches.intersectCornerB['y']))
 
-            objects['Lat_cornerC'].append((k.intersectCornerC['x']))
-            objects['Lon_cornerC'].append((k.intersectCornerC['y']))
+            objects['Lat_cornerC'].append((matches.intersectCornerC['x']))
+            objects['Lon_cornerC'].append((matches.intersectCornerC['y']))
 
-            objects['avg_score'].append(float(k.score_1))
-            objects['avg_score'].append(float(k.score_2))
+            objects['avg_score'].append(float(matches.score_1))
+            objects['avg_score'].append(float(matches.score_2))
 
-            total['detectedPath_1'] = k.detectedPath_1
-            total['detectedPath_2'] = k.detectedPath_2
+            total['detectedPath_1'] = matches.detectedPath_1
+            total['detectedPath_2'] = matches.detectedPath_2
 
-            total['imgUrl_1'] = k.imgUrl_1
-            total['imgUrl_2'] = k.imgUrl_2
+            total['imgUrl_1'] = matches.imgUrl_1
+            total['imgUrl_2'] = matches.imgUrl_2
 
-            total['objId_1'] = k.objId_1
-            total['objId_2'] = k.objId_2
-            total['match_id'] = k.match
+            total['objId_1'] = matches.objId_1
+            total['objId_2'] = matches.objId_2
+            total['match_id'] = matches.match
 
-            total['classname'] = k.classname_1  # doesn't matter same classname_1 and classname_2
+            total['classname'] = matches.classname_1  # doesn't matter same classname_1 and classname_2
 
             # creating geo json format according to paired points
-            geojsonParams = geojsonFormatFunc(k, type="Point")
+            geojsonParams = geojsonFormatFunc(matches, type="Point")
 
             pointsMerged.append(geojsonParams)
             confidence = self.apply_confidence_rule(i)
@@ -252,10 +251,10 @@ class Intersection:
             total['isValid'] = i > 0
 
             # added because of visualization matched paired objects
-            mathed_object_id.append(k.objId_1)
-            mathed_object_id.append(k.objId_2)
-            matched_paired.append([k.intersectCenter['x'],
-                                   k.intersectCenter['y']])
+            matched_object_id.append(matches.objId_1)
+            matched_object_id.append(matches.objId_2)
+            matched_paired.append([matches.intersectCenter['x'],
+                                   matches.intersectCenter['y']])
 
         for k, v in objects.items():
             total[k] = float(sum(v) / len(v))
@@ -263,7 +262,7 @@ class Intersection:
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
         del objects
 
-        return total, pointsMerged, mathed_object_id, matched_paired
+        return total, pointsMerged, matched_object_id, matched_paired
 
     def intersection_points_find(self, **kwargs):
         """
