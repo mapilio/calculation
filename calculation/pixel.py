@@ -1,6 +1,8 @@
 """
 Refers as pixCalc
 """
+from typing import Tuple
+
 import numpy as np
 import cv2
 from scipy.spatial import distance
@@ -164,3 +166,36 @@ class Pixel:
             xmax - xmin) < cfg.boundingBoxMinWidth:  # these variables limited detected box in panoramic that only get this section.
             return False
         return True
+
+    @staticmethod
+    def calc_predict_tile(row: int, col: int, tileHeight: int, tileWidth: int, intersection_size: int,
+                          height: int, width: int) -> Tuple:
+
+        y0 = row * tileHeight
+        y1 = y0 + tileHeight
+        x0 = (col * tileWidth)
+        x1 = x0 + tileWidth
+
+        y1 = y1 + intersection_size
+        x1 = x1 + intersection_size
+
+        if row == 0 and col == 0:
+            y0 = 0
+            x0 = 0
+            y1 = (y0 + tileHeight) + intersection_size
+            x1 = (x0 + tileWidth) + intersection_size
+
+        if y1 > height:
+            y1 = height
+            y0 = y0 - intersection_size
+
+        if x1 > width:
+            x1 = width
+            x0 = x0 - intersection_size
+
+        if x0 < 0:
+            x0 = 0
+        if y0 < 0:
+            y0 = 0
+
+        return x0, x1, y0, y1
