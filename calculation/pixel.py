@@ -29,29 +29,15 @@ class Pixel:
 
         """
         if len(box) == 4:
-            ymin = horizon + y0 + int(round(box[1] * height))
             xmin = x0 + int(round(box[0] * width + lefBegin))
-            ymax = horizon + y0 + int(round(box[3] * height))
+            ymin = horizon + y0 + int(round(box[1] * height))
             xmax = x0 + int(round(box[2] * width + rightBegin))
+            ymax = horizon + y0 + int(round(box[3] * height))
             return [xmin, ymin, xmax, ymax]
         elif len(box) == 2:
-            ymin = horizon + y0 + int(round(box[1] * height))
-            xmin = x0 + int(round(box[0] * width + lefBegin))
-            return [xmin, ymin]
-        else:
-            if len(box):
-                try:
-                    segmentation = []
-                    for index in range(0, len(box) - 1, 2):
-                        segmentation.append([x0 + int(round(box[index] * width + lefBegin)),
-                                             horizon + y0 + int(round(box[index + 1] * height))
-                                             ])
-                    contours = [np.array(segmentation
-                                         , dtype=np.int32)]
-                except:
-                    raise ValueError("Check out box size")
-
-            return contours
+            coordx = x0 + int(round(box[0] * width + lefBegin))
+            coordy = horizon + y0 + int(round(box[1] * height))
+            return [coordx, coordy]
 
     @staticmethod
     def calc_image_tile(cropImage, numRows, numCols):
