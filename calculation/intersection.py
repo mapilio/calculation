@@ -207,7 +207,7 @@ class Intersection:
         total = Dict({
             'isValid': False
         })
-        pointsMerged, matched_object_id, matched_paired, matched_paired = [], [], [], []
+        pointsMerged, matched_object_id, matched_paired = [], [], []
 
         objects = collections.defaultdict(list)
         i = 0
