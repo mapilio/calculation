@@ -1,3 +1,4 @@
+import math
 from typing import Callable, Tuple, List
 
 from calculation.distance import Distance
@@ -149,8 +150,9 @@ class Intersection:
         line2EndY = points.line2EndY
 
         result = {
-            "x": "null",
-            "y": "null",
+            "x": 0,
+            "y": 0,
+            "z": 0,
             "l1": False,
             "l2": False,
         }
@@ -217,15 +219,23 @@ class Intersection:
             matches = Dict(matches)
             objects['Lat_center'].append((matches.intersectCenter['x']))
             objects['Lon_center'].append((matches.intersectCenter['y']))
+            objects['Alt_center'].append((matches.intersectCenter['z']))
 
             objects['Lat_cornerA'].append((matches.intersectCornerA['x']))
             objects['Lon_cornerA'].append((matches.intersectCornerA['y']))
+            objects['Alt_cornerA'].append((matches.intersectCornerA['z']))
 
             objects['Lat_cornerB'].append((matches.intersectCornerB['x']))
             objects['Lon_cornerB'].append((matches.intersectCornerB['y']))
+            objects['Alt_cornerB'].append((matches.intersectCornerB['z']))
 
             objects['Lat_cornerC'].append((matches.intersectCornerC['x']))
             objects['Lon_cornerC'].append((matches.intersectCornerC['y']))
+            objects['Alt_cornerC'].append((matches.intersectCornerC['z']))
+
+            objects['Lat_cornerD'].append((matches.intersectCornerD['x']))
+            objects['Lon_cornerD'].append((matches.intersectCornerD['y']))
+            objects['Alt_cornerD'].append((matches.intersectCornerD['z']))
 
             objects['avg_score'].append(float(matches.score_1))
             objects['avg_score'].append(float(matches.score_2))
@@ -305,12 +315,14 @@ class Intersection:
             return interSection, destinationPoint1, destinationPoint2
 
         if points.type == "area":
-            corners = []
-            for first, second in zip(points.theta1, points.theta2):
-                ops1, ops2 = self.ops_detect(loc=[points.start_lat1, points.start_lon1, first,
-                                                  points.start_lat2, points.start_lon2, second])
+            corners = {}
+            for th1, th2, ph1, ph2, corner_id in zip(points.theta1, points.theta2,
+                                                     points.phi1, points.phi2,
+                                                     points.corners_id):
+                ops1, ops2 = self.ops_detect(loc=[points.start_lat1, points.start_lon1, th1,
+                                                  points.start_lat2, points.start_lon2, th2])
 
-                interSection = self.check_line_intersection(line1StartX=points.start_lat1,
+                is_intersect = self.check_line_intersection(line1StartX=points.start_lat1,
                                                             line1StartY=points.start_lon1,
                                                             line1EndX=ops1["lat"],
                                                             line1EndY=ops1["lon"],
@@ -318,8 +330,29 @@ class Intersection:
                                                             line2StartX=points.start_lat2,
                                                             line2StartY=points.start_lon2,
                                                             line2EndX=ops2["lat"],
-                                                            line2EndY=ops2["lon"])
-                corners.append(interSection)
+                                                            line2EndY=ops2["lon"]
+                                                            )
+                if is_intersect['l1'] and is_intersect['l2']:
+
+                    distance_between_panoroma_first_and_intersected_point = Distance.haversine(
+                        lon1=points.start_lon1, lat1=points.start_lat1,
+                        lon2=is_intersect['y'], lat2=is_intersect['x'])
+
+                    center_altA = (math.tan(
+                        math.radians(ph1) * distance_between_panoroma_first_and_intersected_point) +
+                                   float(points.start_alt1))
+
+                    distance_between_panoroma_second_and_intersected_point = Distance.haversine(
+                        lon1=points.start_lon2, lat1=points.start_lat2,
+                        lon2=is_intersect['y'], lat2=is_intersect['x'])
+
+                    center_altB = (math.tan(
+                        math.radians(ph2) * distance_between_panoroma_second_and_intersected_point) +
+                                   float(points.start_alt2))
+
+                    is_intersect['z'] = (center_altA + center_altB) / 2
+
+                corners[corner_id] = is_intersect
 
             return corners
 
