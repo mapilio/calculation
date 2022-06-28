@@ -3,7 +3,7 @@ from decimal import Decimal
 
 NUMBER_TYPES = (int, float, Decimal)
 
-__version__ = "0.1.11"
+__version__ = "0.1.12"
 __name__ = "calculation-mapilio"
 __major__ = False
 __minor__ = False

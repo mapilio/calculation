@@ -252,6 +252,8 @@ class Intersection:
 
             total['classname'] = matches.classname_1  # doesn't matter same classname_1 and classname_2
 
+            total['feature'] = matches.feature_1 or matches.feature_2
+
             # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(matches, type="Point")
 
