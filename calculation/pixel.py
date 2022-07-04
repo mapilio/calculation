@@ -185,3 +185,24 @@ class Pixel:
             y0 = 0
 
         return x0, x1, y0, y1
+
+    @staticmethod
+    def middle_points_pixels(point_1: list, point_2: list) -> list:
+        """
+        :param point_1: List of contain a point's coordinates value
+        :param point_2: List of contain a point's coordinates value
+        :return: Middle point of between given two points
+        """
+        middle_p = [(point_1[0] + point_2[0]) / 2, (point_1[1] + point_2[1]) / 2]
+        return middle_p
+
+    @staticmethod
+    def distance_pixels(cor_1: list, cor_2: list) -> int:
+        from math import sqrt
+        """
+        :param cor_1: List of contain a point's coordinates value
+        :param cor_2: List of contain a point's coordinates value
+        :return: Distance between given two points
+        """
+        dist = int(sqrt((cor_2[0] - cor_1[0]) ** 2 + (cor_2[1] - cor_1[1]) ** 2))
+        return dist
