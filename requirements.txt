@@ -1,13 +1,5 @@
-addict==2.4.0
-geographiclib==1.50
+addict
 numpy
-opencv-python==4.5.1.48
-solve==0.0.0
-trianglesolver==1.2
-helper-mapilio
-ExifRead==2.3.2
-pytz==2021.1
-requests==2.25.1
-scipy
-pandas
-matplotlib
+trianglesolver
+ExifRead
+requests

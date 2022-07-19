@@ -1,8 +1,7 @@
 import requests
 from calculation.distance import Distance
 from io import BytesIO
-from helper.exif_read import ExifRead
-from helper.generator import Generator
+from calculation.utilities import ExifRead, Generator
 
 
 class ExifExtractHeading:

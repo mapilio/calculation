@@ -2,7 +2,7 @@ import math
 from typing import Callable, Tuple, List
 
 from calculation.distance import Distance
-from helper.convertor import Convertor
+from calculation.utilities import Convertor
 
 from addict import Dict
 import collections
