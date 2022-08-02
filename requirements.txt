@@ -1,7 +1,5 @@
 addict==2.4.0
 geographiclib==1.50
-numpy
-opencv-python==4.5.1.48
 solve==0.0.0
 trianglesolver==1.2
 helper-mapilio
