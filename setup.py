@@ -24,6 +24,7 @@ INSTALL_REQUIRES = [
     'requests',
     'trianglesolver',
     'ExifRead',
+    'scipy',
     'addict'
 ]
 
