@@ -3,4 +3,3 @@ numpy
 trianglesolver
 ExifRead
 requests
-matplotlib

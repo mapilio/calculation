@@ -24,10 +24,8 @@ INSTALL_REQUIRES = [
     'requests',
     'trianglesolver',
     'ExifRead',
-    'scipy',
     'addict'
 ]
-
 
 setup(
     name=__name__,
