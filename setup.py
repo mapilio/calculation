@@ -28,6 +28,7 @@ INSTALL_REQUIRES = [
     'addict'
 ]
 
+
 setup(
     name=__name__,
     version=__version__,
