@@ -1,7 +1,6 @@
 from math import radians, cos, sin, asin, sqrt, atan2, pi
 from calculation.units import TO_RAD, TO_DEG, RADIUS
 from trianglesolver import solve, degree
-import numpy
 import math
 
 from addict import Dict

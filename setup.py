@@ -21,11 +21,10 @@ from calculation.util import __name__
 
 INSTALL_REQUIRES = [
     'numpy',
-    'solve',
+    'requests',
     'trianglesolver',
-    'geopy',
-    'scipy',
-    'helper-mapilio',
+    'ExifRead',
+    'addict'
 ]
 
 setup(
