@@ -269,7 +269,16 @@ class Intersection:
                                    matches.intersectCenter['y']])
 
         for k, v in objects.items():
-            total[k] = float(sum(v) / len(v))
+            counter = 0
+            for c in v:
+                if c == 0:
+                    counter += 1
+            if counter==len(v):
+                counter=0
+            if k in ["Alt_cornerB", "Alt_cornerC", "Alt_cornerD", "Alt_cornerA"]:
+                total[k] = float(sum(v) / (len(v) - counter))
+            else:
+                total[k] = float(sum(v) / len(v))
 
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
         del objects
@@ -341,7 +350,7 @@ class Intersection:
                         lon2=is_intersect['y'], lat2=is_intersect['x'])
 
                     center_altA = (math.tan(
-                        math.radians(ph1) * distance_between_panoroma_first_and_intersected_point) +
+                        math.radians(ph1)) * distance_between_panoroma_first_and_intersected_point +
                                    float(points.start_alt1))
 
                     distance_between_panoroma_second_and_intersected_point = Distance.haversine(
@@ -349,7 +358,7 @@ class Intersection:
                         lon2=is_intersect['y'], lat2=is_intersect['x'])
 
                     center_altB = (math.tan(
-                        math.radians(ph2) * distance_between_panoroma_second_and_intersected_point) +
+                        math.radians(ph2)) * distance_between_panoroma_second_and_intersected_point +
                                    float(points.start_alt2))
 
                     is_intersect['z'] = (center_altA + center_altB) / 2
