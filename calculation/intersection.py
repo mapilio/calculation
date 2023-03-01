@@ -9,6 +9,7 @@ import collections
 
 
 class Intersection:
+    global total
 
     def __init__(self, **kwargs):
         """
@@ -214,7 +215,7 @@ class Intersection:
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
-        for matches in groupMatches:
+        for index,matches in enumerate(groupMatches):
             i += 2
             matches = Dict(matches)
             objects['Lat_center'].append((matches.intersectCenter['x']))
@@ -253,6 +254,19 @@ class Intersection:
             total['classname'] = matches.classname_1  # doesn't matter same classname_1 and classname_2
 
             total['feature'] = matches.feature_1 or matches.feature_2
+
+            total[i]['detectedPath_1'] = matches.detectedPath_1
+            total[i]['detectedPath_2'] = matches.detectedPath_2
+            total[i]['Lat_center'] = matches.intersectCenter['x']
+            total[i]['Lon_center'] = matches.intersectCenter['y']
+            total[i]['imgUrl_1'] = matches.imgUrl_1
+            total[i]['imgUrl_2'] = matches.imgUrl_2
+            total[i]['objId_1'] = matches.objId_1
+            total[i]['objId_2'] = matches.objId_2
+            total[i]['match_id'] = matches.match
+            total[i]['panoid1'] = matches.panoId_1
+            total[i]['panoid2'] = matches.panoId_2
+            total[i]['classname'] = matches.classname_1
 
             # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(matches, type="Point")
@@ -371,13 +385,11 @@ class Intersection:
 
 def intersection_float_to_decimal(lat1, lon1, lat2, lon2) -> Tuple:
     """
-
     Args:
         lat1:
         lon1:
         lat2:
         lon2:
-
     Returns:
         points convert decimal format
     """
