@@ -241,32 +241,20 @@ class Intersection:
             objects['avg_score'].append(float(matches.score_1))
             objects['avg_score'].append(float(matches.score_2))
 
-            total['detectedPath_1'] = matches.detectedPath_1
-            total['detectedPath_2'] = matches.detectedPath_2
+            total[i]['detectedPath_1'] = matches.detectedPath_1
+            total[i]['detectedPath_2'] = matches.detectedPath_2
 
-            total['imgUrl_1'] = matches.imgUrl_1
-            total['imgUrl_2'] = matches.imgUrl_2
+            total[i]['imgUrl_1'] = matches.imgUrl_1
+            total[i]['imgUrl_2'] = matches.imgUrl_2
 
-            total['objId_1'] = matches.objId_1
-            total['objId_2'] = matches.objId_2
+            total[i]['objId_1'] = matches.objId_1
+            total[i]['objId_2'] = matches.objId_2
             total['match_id'] = matches.match
 
             total['classname'] = matches.classname_1  # doesn't matter same classname_1 and classname_2
 
             total['feature'] = matches.feature_1 or matches.feature_2
 
-            total[i]['detectedPath_1'] = matches.detectedPath_1
-            total[i]['detectedPath_2'] = matches.detectedPath_2
-            total[i]['Lat_center'] = matches.intersectCenter['x']
-            total[i]['Lon_center'] = matches.intersectCenter['y']
-            total[i]['imgUrl_1'] = matches.imgUrl_1
-            total[i]['imgUrl_2'] = matches.imgUrl_2
-            total[i]['objId_1'] = matches.objId_1
-            total[i]['objId_2'] = matches.objId_2
-            total[i]['match_id'] = matches.match
-            total[i]['panoid1'] = matches.panoId_1
-            total[i]['panoid2'] = matches.panoId_2
-            total[i]['classname'] = matches.classname_1
 
             # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(matches, type="Point")
@@ -296,7 +284,7 @@ class Intersection:
 
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
         del objects
-
+        print("total",total)
         return total, pointsMerged, matched_object_id, matched_paired
 
     def intersection_points_find(self, **kwargs):
