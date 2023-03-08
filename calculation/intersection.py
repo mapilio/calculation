@@ -284,7 +284,6 @@ class Intersection:
 
         total['confidence'] = (total['avg_score'] + confidence) * 0.5
         del objects
-        print("total",total)
         return total, pointsMerged, matched_object_id, matched_paired
 
     def intersection_points_find(self, **kwargs):
