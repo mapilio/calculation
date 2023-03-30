@@ -9,11 +9,9 @@ import collections
 
 
 class Intersection:
-    global total
 
     def __init__(self, **kwargs):
         """
-
         Args:
             **kwargs:
             -> intersection_lineLength=self.config.intersection.lineLength,
@@ -27,10 +25,8 @@ class Intersection:
     @staticmethod
     def apply_confidence_rule(c):
         """
-
         Args:
             c: detected car location
-
         Returns:
             it's score for how many has captured car locations and calculate 0 < result < 100
         """
@@ -77,7 +73,6 @@ class Intersection:
             angle  = 50 and heading = 320  result {theta must be between max 270 min 30}
         Args:
             nArr: its list and include headings
-
         Returns:
             up limit and down limit for theta degrees.
         """
@@ -109,22 +104,18 @@ class Intersection:
         when we change it from the config file to specify the line length here.
         Args:
             loc: calculated coordinates
-
         Returns:
-
         """
         ops = []
         for i in range(0, len(loc), 3):
             ops.append(Distance.destination_point(lat=loc[i], lon=loc[i + 1], distance=self.intersection_lineLength,
                                                   bearing=loc[i + 2]))
-
         return ops[0], ops[1]
 
     @staticmethod
     def check_line_intersection(**kwargs) -> Dict:
         """
         Calculate from two points intersected locations
-
         Args:
             **kwargs:
             -> line1StartX
@@ -135,9 +126,7 @@ class Intersection:
             -> line2StartY
             -> line2EndX
             -> line2EndY
-
         Returns:
-
         """
 
         points = Dict(kwargs)
@@ -199,11 +188,9 @@ class Intersection:
     def intersection_points_average(self, groupMatches: list, geojsonFormatFunc: Callable) -> Tuple[
         Dict, list, list, List[list]]:
         """
-
         Args:
             groupMatches: matched objects same class, same points
             geojsonFormatFunc: it's function for creating geojson format
-
         Returns:
             It calculates a single point by taking the averages of all the detected intersections.
         """
@@ -215,7 +202,7 @@ class Intersection:
         objects = collections.defaultdict(list)
         i = 0
         confidence = 0
-        for index,matches in enumerate(groupMatches):
+        for matches in groupMatches:
             i += 2
             matches = Dict(matches)
             objects['Lat_center'].append((matches.intersectCenter['x']))
@@ -255,7 +242,6 @@ class Intersection:
 
             total['feature'] = matches.feature_1 or matches.feature_2
 
-
             # creating geo json format according to paired points
             geojsonParams = geojsonFormatFunc(matches, type="Point")
 
@@ -275,8 +261,8 @@ class Intersection:
             for c in v:
                 if c == 0:
                     counter += 1
-            if counter==len(v):
-                counter=0
+            if counter == len(v):
+                counter = 0
             if k in ["Alt_cornerB", "Alt_cornerC", "Alt_cornerD", "Alt_cornerA"]:
                 total[k] = float(sum(v) / (len(v) - counter))
             else:
@@ -298,7 +284,6 @@ class Intersection:
             -> start_lon2
             -> theta2
             -> type : intersect or area
-
         Returns:
             get coordinates
         """
@@ -349,6 +334,8 @@ class Intersection:
                     distance_between_panoroma_first_and_intersected_point = Distance.haversine(
                         lon1=points.start_lon1, lat1=points.start_lat1,
                         lon2=is_intersect['y'], lat2=is_intersect['x'])
+                    ph1 = 180 - ph1 if ph1 > 90 else ph1
+                    ph2 = 180 - ph2 if ph2 > 90 else ph2
 
                     center_altA = (math.tan(
                         math.radians(ph1)) * distance_between_panoroma_first_and_intersected_point +
@@ -365,7 +352,6 @@ class Intersection:
                     is_intersect['z'] = (center_altA + center_altB) / 2
 
                 corners[corner_id] = is_intersect
-
             return corners
 
 
