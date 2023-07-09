@@ -32,7 +32,7 @@ setup(
     version=__version__,
     description='Mapilio Calculation Library',
     url='https://github.com/mapilio/calculation.git',
-    author='Mapilio - Ozcan Durak & MCV',
+    author='Mapilio - Ozcan Durak',
     author_email='ozcan@visiosoft.com.tr',
     long_description="""# Mapilio Calculation Library""",
     long_description_content_type='text/markdown',
