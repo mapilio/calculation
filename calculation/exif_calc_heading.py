@@ -9,6 +9,7 @@ class ExifExtractHeading:
     # TODO and these variables will send heading calc function.
     @staticmethod
     def heading_calc(img_urls: list) -> dict:
+        print(1)
         processing_format = {}
         objects_zone = []
         for key, x in enumerate(range(0, len(img_urls) - 1, 1)):
