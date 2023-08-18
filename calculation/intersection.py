@@ -334,8 +334,9 @@ class Intersection:
                     distance_between_panoroma_first_and_intersected_point = Distance.haversine(
                         lon1=points.start_lon1, lat1=points.start_lat1,
                         lon2=is_intersect['y'], lat2=is_intersect['x'])
-                    ph1 = 180 - ph1 if ph1 > 90 else ph1
-                    ph2 = 180 - ph2 if ph2 > 90 else ph2
+                    # it changes cos range as 0-90 and altitude always increases according this formula
+                    # ph1 = 180 - ph1 if ph1 > 90 else ph1
+                    # ph2 = 180 - ph2 if ph2 > 90 else ph2
 
                     #https://mathinsight.org/spherical_coordinates
                     center_altA = (math.cos(
