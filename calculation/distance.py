@@ -99,7 +99,7 @@ class Distance:
         return c * RADIUS
 
     @staticmethod
-    def destination_point(lat, lon, distance, bearing):
+    def destination_point(lat, lon, distance, theta):
         """
         :lat :
         :lon :
@@ -108,7 +108,7 @@ class Distance:
         """
 
         δ = distance / RADIUS
-        θ = bearing * TO_RAD
+        θ = theta * TO_RAD
         φ1 = radians(lat)
         λ1 = radians(lon)
         φ2 = asin(sin(φ1) * cos(δ) + cos(φ1) * sin(δ) * cos(θ))

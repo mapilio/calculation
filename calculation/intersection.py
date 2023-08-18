@@ -109,7 +109,7 @@ class Intersection:
         ops = []
         for i in range(0, len(loc), 3):
             ops.append(Distance.destination_point(lat=loc[i], lon=loc[i + 1], distance=self.intersection_lineLength,
-                                                  bearing=loc[i + 2]))
+                                                  theta=loc[i + 2]))
         return ops[0], ops[1]
 
     @staticmethod
@@ -337,7 +337,8 @@ class Intersection:
                     ph1 = 180 - ph1 if ph1 > 90 else ph1
                     ph2 = 180 - ph2 if ph2 > 90 else ph2
 
-                    center_altA = (math.tan(
+                    #https://mathinsight.org/spherical_coordinates
+                    center_altA = (math.cos(
                         math.radians(ph1)) * distance_between_panoroma_first_and_intersected_point +
                                    float(points.start_alt1))
 
@@ -345,7 +346,7 @@ class Intersection:
                         lon1=points.start_lon2, lat1=points.start_lat2,
                         lon2=is_intersect['y'], lat2=is_intersect['x'])
 
-                    center_altB = (math.tan(
+                    center_altB = (math.cos(
                         math.radians(ph2)) * distance_between_panoroma_second_and_intersected_point +
                                    float(points.start_alt2))
 
