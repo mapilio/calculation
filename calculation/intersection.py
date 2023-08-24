@@ -308,6 +308,10 @@ class Intersection:
                                                         line2StartY=points.start_lon2,
                                                         line2EndX=ops2["lat"],
                                                         line2EndY=ops2["lon"])
+            if interSection['l1'] and interSection['l2']:
+                interSection['z'] = self.calc_intersect_z(points.start_lon1, points.start_lat1, points.start_alt1, points.phi1,
+                                                          points.start_lon2, points.start_lat2, points.start_alt2, points.phi2,
+                                                          interSection)
 
             return interSection, destinationPoint1, destinationPoint2
 
@@ -330,32 +334,38 @@ class Intersection:
                                                             line2EndY=ops2["lon"]
                                                             )
                 if is_intersect['l1'] and is_intersect['l2']:
-
-                    distance_between_panoroma_first_and_intersected_point = Distance.haversine(
-                        lon1=points.start_lon1, lat1=points.start_lat1,
-                        lon2=is_intersect['y'], lat2=is_intersect['x'])
-                    # it changes cos range as 0-90 and altitude always increases according this formula
-                    # ph1 = 180 - ph1 if ph1 > 90 else ph1
-                    # ph2 = 180 - ph2 if ph2 > 90 else ph2
-
-                    #https://mathinsight.org/spherical_coordinates
-                    center_altA = (math.cos(
-                        math.radians(ph1)) * distance_between_panoroma_first_and_intersected_point +
-                                   float(points.start_alt1))
-
-                    distance_between_panoroma_second_and_intersected_point = Distance.haversine(
-                        lon1=points.start_lon2, lat1=points.start_lat2,
-                        lon2=is_intersect['y'], lat2=is_intersect['x'])
-
-                    center_altB = (math.cos(
-                        math.radians(ph2)) * distance_between_panoroma_second_and_intersected_point +
-                                   float(points.start_alt2))
-
-                    is_intersect['z'] = (center_altA + center_altB) / 2
+                    is_intersect['z'] = self.calc_intersect_z( points.start_lon1,points.start_lat1,points.start_alt1,ph1,
+                                                               points.start_lon2, points.start_lat2, points.start_alt2, ph2,
+                                                               is_intersect)
 
                 corners[corner_id] = is_intersect
             return corners
+    def calc_intersect_z(self, start_lon1,start_lat1,start_alt1,phi1,
+                               start_lon2, start_lat2, start_alt2, phi2,
+                               is_intersect
+                         ):
 
+        distance_between_panoroma_first_and_intersected_point = Distance.haversine(
+            lon1=start_lon1, lat1=start_lat1,
+            lon2=is_intersect['y'], lat2=is_intersect['x'])
+        # it changes cos range as 0-90 and altitude always increases according this formula
+        # ph1 = 180 - ph1 if ph1 > 90 else ph1
+        # ph2 = 180 - ph2 if ph2 > 90 else ph2
+
+        # https://mathinsight.org/spherical_coordinates
+        center_altA = (math.cos(
+            math.radians(phi1)) * distance_between_panoroma_first_and_intersected_point +
+                       float(start_alt1))
+
+        distance_between_panoroma_second_and_intersected_point = Distance.haversine(
+            lon1=start_lon2, lat1=start_lat2,
+            lon2=is_intersect['y'], lat2=is_intersect['x'])
+
+        center_altB = (math.cos(
+            math.radians(phi2)) * distance_between_panoroma_second_and_intersected_point +
+                       float(start_alt2))
+
+        return (center_altA + center_altB) / 2
 
 
 def intersection_float_to_decimal(lat1, lon1, lat2, lon2) -> Tuple:
