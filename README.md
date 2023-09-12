@@ -4,6 +4,8 @@
 ## Git clone 
     git clone https://github.com/mapilio/calculation.git
 ## Installation
+    pip install calculation-mapilio
+##### or
     cd calculation
     python setup.py install --force
 ##### or
