@@ -2,10 +2,10 @@ import urllib.request
 import json
 from typing import Dict, Any
 
-from calculation.util import __name__ as name
-from calculation.util import __major__ as major
-from calculation.util import __minor__ as minor
-from calculation.util import __patch__ as patch
+from calculation.version import __name__ as name
+from calculation.version import __major__ as major
+from calculation.version import __minor__ as minor
+from calculation.version import __patch__ as patch
 
 
 def update_version(reqs: list, major: bool, minor: bool, patch:bool) -> str:

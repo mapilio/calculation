@@ -17,7 +17,7 @@ if sys.version_info < (3, 5):
 # because the code being imported here is not compatible with the older
 # versions of Python.
 from increment_version import __version__
-from calculation.util import __name__
+from calculation.version import __name__
 
 INSTALL_REQUIRES = [
     'numpy',
