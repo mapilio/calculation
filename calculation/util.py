@@ -1,6 +1,6 @@
 import math
 
-def get_aspect_ratio(width, height):
+def get_aspect_ratio(width: int, height: int):
 
     """
     Calculates the aspect ratio from given width and height.
@@ -10,7 +10,7 @@ def get_aspect_ratio(width, height):
          height (int): height in pixels
 
     Returns:
-         Calculated aspect ratio
+         Calculated aspect ratio.
 
     """
 
@@ -19,7 +19,8 @@ def get_aspect_ratio(width, height):
     return aspect_ratio
 
 
-def calculate_vfov(fov, width, height):
+def calculate_vfov(fov: float, width: int, height: int):
+
     """
     Calculates vfov from given width, height and hvof.
 
