@@ -45,22 +45,14 @@ class Intersection:
             only two position cars calculate and return such as [True, False],  [False, False]
         """
         rets = []
-        for params in frameFilters:
-            ## n = chech between a and b parameter
-            ## a start point angle
-            ## b finish point angle
-            n = int(params[0])
-            a = int(params[1])
-            b = int(params[2])
-            n = (360 + (n % 360)) % 360
-            a = (3600000 + a) % 360
-            b = (3600000 + b) % 360
-            if a < b:
-                result = a <= n <= b
-                rets.append(result)
-            else:
-                result = a <= n or n <= b
-                rets.append(result)
+        for (theta,max_theta,min_theta) in frameFilters:
+
+            theta_norm = (360 + theta) % 360
+            # If max_theta is smaller than min_theta, unnormalize theta_norm and max_theta, it provides to use formula.
+            if max_theta < min_theta:
+                max_theta+=360
+            result = max_theta >= theta_norm >= min_theta
+            rets.append(result)
 
         return rets
 
@@ -80,19 +72,20 @@ class Intersection:
         a = self.intersection_angle_wide
         ret = []
         for n in nArr:
-            t = 360 + n
-            x = (-(a - t)) % 360
-            y = (a + t) % 360
+            min_theta=n-a/2
+            max_theta=n+a/2
+            min_theta_norm=(min_theta+360)%360
+            max_theta_norm=(max_theta+360)%360
             # x, y hands of angle
-            ret.append([x, y])
+            ret.append([min_theta_norm, max_theta_norm])
 
         anglesArr = [item for sublist in ret for item in sublist]
         assert len(anglesArr) >= 4, "Check your Thetas"
         angles = Dict({
-            'max1Ahead': anglesArr[0],
-            'min1Ahead': anglesArr[1],
-            'max2Ahead': anglesArr[2],
-            'min2Ahead': anglesArr[3]
+            'min1Ahead': anglesArr[0],
+            'max1Ahead': anglesArr[1],
+            'min2Ahead': anglesArr[2],
+            'max2Ahead': anglesArr[3],
         })
         del anglesArr
         return angles
