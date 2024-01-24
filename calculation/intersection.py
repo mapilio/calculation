@@ -47,12 +47,11 @@ class Intersection:
         rets = []
         for (theta,max_theta,min_theta) in frameFilters:
 
-            theta = (360 + theta) % 360
+            theta_norm = (360 + theta) % 360
             # If max_theta is smaller than min_theta, unnormalize theta_norm and max_theta, it provides to use formula.
             if max_theta < min_theta:
-                theta+=360
                 max_theta+=360
-            result = max_theta >= theta >= min_theta
+            result = max_theta >= theta_norm >= min_theta
             rets.append(result)
 
         return rets
@@ -77,6 +76,7 @@ class Intersection:
             max_theta=n+a/2
             min_theta_norm=(min_theta+360)%360
             max_theta_norm=(max_theta+360)%360
+            # x, y hands of angle
             ret.append([min_theta_norm, max_theta_norm])
 
         anglesArr = [item for sublist in ret for item in sublist]
