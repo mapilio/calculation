@@ -63,7 +63,6 @@ class Distance:
         dLmd = radians(destLon - startLon)
         aci = atan2(sin(dLmd) * cosPhi2,
                     cos(phi1) * sin(phi2) - sin(phi1) * cosPhi2 * cos(dLmd))
-        print(aci * TO_DEG)
         return aci * TO_DEG
 
     @staticmethod
