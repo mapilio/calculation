@@ -45,13 +45,14 @@ class Intersection:
             only two position cars calculate and return such as [True, False],  [False, False]
         """
         rets = []
-        for (theta,max_theta,min_theta) in frameFilters:
+        for (theta, max_theta, min_theta) in frameFilters:
 
             theta_norm = (360 + theta) % 360
             # If max_theta is smaller than min_theta, unnormalize theta_norm and max_theta, it provides to use formula.
             if max_theta < min_theta:
-                max_theta+=360
-            result = max_theta >= theta_norm >= min_theta
+                result = (max_theta + 360) >= (theta_norm + 360) >= min_theta
+            else:
+                result = max_theta >= theta_norm >= min_theta
             rets.append(result)
 
         return rets
@@ -72,10 +73,10 @@ class Intersection:
         a = self.intersection_angle_wide
         ret = []
         for n in nArr:
-            min_theta=n-a/2
-            max_theta=n+a/2
-            min_theta_norm=(min_theta+360)%360
-            max_theta_norm=(max_theta+360)%360
+            min_theta = n - a / 2
+            max_theta = n + a / 2
+            min_theta_norm = (min_theta + 360) % 360
+            max_theta_norm = (max_theta + 360) % 360
             # x, y hands of angle
             ret.append([min_theta_norm, max_theta_norm])
 
@@ -145,12 +146,12 @@ class Intersection:
         # and the one from the database can be decimal.
         if isinstance(line1StartX, float):
             line1StartX, line1StartY, \
-            line2StartX, line2StartY = intersection_float_to_decimal(line1StartX, line1StartY,
-                                                                     line2StartX, line2StartY)
+                line2StartX, line2StartY = intersection_float_to_decimal(line1StartX, line1StartY,
+                                                                         line2StartX, line2StartY)
         if isinstance(line1EndX, float):
             line1EndX, line1EndY, \
-            line2EndX, line2EndY = intersection_float_to_decimal(line1EndX, line1EndY,
-                                                                 line2EndX, line2EndY)
+                line2EndX, line2EndY = intersection_float_to_decimal(line1EndX, line1EndY,
+                                                                     line2EndX, line2EndY)
 
         posit1 = ((line2EndY - line2StartY) * (line1EndX - line1StartX))
         posit2 = ((line2EndX - line2StartX) * (line1EndY - line1StartY))
@@ -302,8 +303,10 @@ class Intersection:
                                                         line2EndX=ops2["lat"],
                                                         line2EndY=ops2["lon"])
             if interSection['l1'] and interSection['l2']:
-                interSection['z'] = self.calc_intersect_z(points.start_lon1, points.start_lat1, points.start_alt1, points.phi1,
-                                                          points.start_lon2, points.start_lat2, points.start_alt2, points.phi2,
+                interSection['z'] = self.calc_intersect_z(points.start_lon1, points.start_lat1, points.start_alt1,
+                                                          points.phi1,
+                                                          points.start_lon2, points.start_lat2, points.start_alt2,
+                                                          points.phi2,
                                                           interSection)
 
             return interSection, destinationPoint1, destinationPoint2
@@ -327,15 +330,18 @@ class Intersection:
                                                             line2EndY=ops2["lon"]
                                                             )
                 if is_intersect['l1'] and is_intersect['l2']:
-                    is_intersect['z'] = self.calc_intersect_z( points.start_lon1,points.start_lat1,points.start_alt1,ph1,
-                                                               points.start_lon2, points.start_lat2, points.start_alt2, ph2,
-                                                               is_intersect)
+                    is_intersect['z'] = self.calc_intersect_z(points.start_lon1, points.start_lat1, points.start_alt1,
+                                                              ph1,
+                                                              points.start_lon2, points.start_lat2, points.start_alt2,
+                                                              ph2,
+                                                              is_intersect)
 
                 corners[corner_id] = is_intersect
             return corners
-    def calc_intersect_z(self, start_lon1,start_lat1,start_alt1,phi1,
-                               start_lon2, start_lat2, start_alt2, phi2,
-                               is_intersect
+
+    def calc_intersect_z(self, start_lon1, start_lat1, start_alt1, phi1,
+                         start_lon2, start_lat2, start_alt2, phi2,
+                         is_intersect
                          ):
 
         distance_between_panoroma_first_and_intersected_point = Distance.haversine(
